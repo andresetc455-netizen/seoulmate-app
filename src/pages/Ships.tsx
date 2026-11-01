@@ -78,11 +78,17 @@ export function Chibi({ m, mood = 'happy', size = 120 }: { m: ShipMember; mood?:
   return (
     <svg viewBox="0 0 100 130" width={size} height={size * 1.3} aria-hidden="true" className="chibi-svg">
       {m.style === 'long' && <path d="M14 46 Q8 90 16 118 L34 112 L34 70 L66 70 L66 112 L84 118 Q92 90 86 46Z" fill={m.hair} />}
+      {m.style === 'long' && m.highlights && (
+        <path d="M20 52 Q15 85 20 114 M80 52 Q85 85 80 114 M27 60 Q24 86 28 111 M73 60 Q76 86 72 111" stroke={m.highlights} strokeWidth="2.2" fill="none" strokeLinecap="round" opacity="0.75" />
+      )}
       <rect x="28" y="84" width="44" height="40" rx="16" fill={m.outfit} />
       <circle cx="26" cy="98" r="8" fill="#ffe3cf" />
       <circle cx="74" cy="98" r="8" fill="#ffe3cf" />
       <circle cx="50" cy="48" r="36" fill="#ffe8d6" />
       <Hair m={m} />
+      {m.highlights && (
+        <path d="M37 17 Q34 26 36 38 M63 17 Q66 26 64 38 M49 13 Q48 22 50 33 M24 26 Q19 36 17 46 M76 26 Q81 36 83 46" stroke={m.highlights} strokeWidth="2.2" fill="none" strokeLinecap="round" opacity="0.75" />
+      )}
       <Eyes mood={mood} />
       <ellipse cx="28" cy="58" rx="6" ry={mood === 'blush' ? 5 : 3.5} fill="#f6a5bd" opacity={mood === 'blush' ? 0.95 : 0.6} />
       <ellipse cx="72" cy="58" rx="6" ry={mood === 'blush' ? 5 : 3.5} fill="#f6a5bd" opacity={mood === 'blush' ? 0.95 : 0.6} />

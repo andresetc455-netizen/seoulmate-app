@@ -10,6 +10,7 @@ export interface ShipMember {
   bts?: boolean;
   glasses?: boolean;
   labret?: boolean;
+  highlights?: string;
 }
 
 export const SHIP_MEMBERS: ShipMember[] = [
@@ -22,7 +23,7 @@ export const SHIP_MEMBERS: ShipMember[] = [
   { id: 'jk', name: 'Jung Kook', emoji: '🐰', hair: '#2f2a3a', outfit: '#3d3350', style: 'fluffy' },
   // Ellos dos, dibujados a partir de sus fotos.
   { id: 'andres', name: 'Andrés', emoji: '🤓', hair: '#241a16', outfit: '#d9343c', style: 'curly', glasses: true },
-  { id: 'nicole', name: 'Nicole', emoji: '💐', hair: '#16100e', outfit: '#2a2530', style: 'long', labret: true },
+  { id: 'nicole', name: 'Nicole', emoji: '💐', hair: '#16100e', outfit: '#2a2530', style: 'long', labret: true, highlights: '#c99460' },
 ];
 
 export const BTS_IDS = ['rm', 'jin', 'suga', 'jhope', 'jimin', 'v', 'jk'];
