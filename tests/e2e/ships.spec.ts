@@ -31,6 +31,8 @@ test('ships: acciones animadas y apodos con filtro', async ({ page }) => {
   await page.getByRole('button', { name: /Abrazo grupal/ }).click();
   await expect(page.getByText(/Abrazo grupal!|no los suelta/)).toBeVisible();
   await page.getByRole('button', { name: 'Todos (OT7)' }).click();
+  await page.evaluate(() => window.scrollTo(0, 380));
+  await page.screenshot({ path: 'docs/screenshots/39-ships-personajes.png' });
   await page.getByRole('button', { name: /Baile en ronda/ }).click();
   await expect(page.getByRole('heading', { name: /OT7/ })).toBeVisible();
   await page.waitForTimeout(1400);

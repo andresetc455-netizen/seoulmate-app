@@ -4,81 +4,10 @@ import { btsDoc } from '../lib/docs';
 import { toast } from '../components/ui';
 import {
   SHIP_ACTIONS, SHIP_MEMBERS, FORBIDDEN_NICKNAME_MSG, NICKNAME_MAX, actionLine, compatibility, displayName,
-  isForbiddenNickname, joinNames, memberById, nicknamesOf, shipName, type Mood, type ShipAction, type ShipMember,
+  isForbiddenNickname, joinNames, memberById, nicknamesOf, shipName, type ShipAction,
 } from '../lib/ships';
+import { ShipCharacter } from './ShipCharacter';
 import './ships.css';
-
-// ---------- Chibi dibujado en SVG (caricatura, sin fotos) ----------
-function Hair({ m }: { m: ShipMember }) {
-  const c = m.hair;
-  switch (m.style) {
-    case 'side':
-      return <path d="M14 46 Q14 12 50 12 Q86 12 86 46 Q74 30 52 28 Q34 34 14 46Z" fill={c} />;
-    case 'curtain':
-      return <path d="M14 50 Q12 12 50 12 Q88 12 86 50 Q80 34 66 30 Q58 40 50 30 Q42 40 34 30 Q20 34 14 50Z" fill={c} />;
-    case 'spiky':
-      return <path d="M14 46 L20 18 L30 26 L38 10 L48 22 L58 8 L66 22 L76 12 L80 28 L86 46 Q70 30 50 30 Q30 30 14 46Z" fill={c} />;
-    case 'bowl':
-      return <path d="M13 50 Q12 12 50 12 Q88 12 87 50 Q86 36 80 36 L20 36 Q14 36 13 50Z" fill={c} />;
-    default:
-      return (
-        <g fill={c}>
-          <path d="M14 48 Q12 14 50 12 Q88 14 86 48 Q78 32 62 34 Q56 28 50 34 Q44 28 38 34 Q22 32 14 48Z" />
-          <circle cx="26" cy="22" r="10" />
-          <circle cx="50" cy="14" r="10" />
-          <circle cx="74" cy="22" r="10" />
-        </g>
-      );
-  }
-}
-
-function Eyes({ mood }: { mood: Mood }) {
-  if (mood === 'love')
-    return (
-      <g fill="#e2577f">
-        <path d="M33 50 q-4-5 0-7 q2-1 3 1 q1-2 3-1 q4 2 0 7 l-3 3z" />
-        <path d="M61 50 q-4-5 0-7 q2-1 3 1 q1-2 3-1 q4 2 0 7 l-3 3z" />
-      </g>
-    );
-  if (mood === 'kiss' || mood === 'happy')
-    return (
-      <g stroke="#3d3350" strokeWidth="2.6" fill="none" strokeLinecap="round">
-        <path d={mood === 'kiss' ? 'M31 49 q5 3 10 0' : 'M31 50 q5-5 10 0'} />
-        <path d={mood === 'kiss' ? 'M59 49 q5 3 10 0' : 'M59 50 q5-5 10 0'} />
-      </g>
-    );
-  return (
-    <g fill="#3d3350">
-      <ellipse cx="36" cy="49" rx="4" ry="5" />
-      <ellipse cx="64" cy="49" rx="4" ry="5" />
-      <circle cx="37.5" cy="47" r="1.4" fill="#fff" />
-      <circle cx="65.5" cy="47" r="1.4" fill="#fff" />
-    </g>
-  );
-}
-
-function Mouth({ mood }: { mood: Mood }) {
-  if (mood === 'kiss') return <path d="M47 63 q4-3 6 0 q-2 2 0 4 q-3 3-6 0" fill="#e2577f" />;
-  if (mood === 'blush') return <path d="M45 63 q5 3 10 0" stroke="#3d3350" strokeWidth="2.2" fill="none" strokeLinecap="round" />;
-  return <path d="M44 61 q6 7 12 0 z" fill="#c95a7a" />;
-}
-
-export function Chibi({ m, mood = 'happy', size = 120 }: { m: ShipMember; mood?: Mood; size?: number }) {
-  return (
-    <svg viewBox="0 0 100 130" width={size} height={size * 1.3} aria-hidden="true" className="chibi-svg">
-      <rect x="28" y="84" width="44" height="40" rx="16" fill={m.outfit} />
-      <circle cx="26" cy="98" r="8" fill="#ffe3cf" />
-      <circle cx="74" cy="98" r="8" fill="#ffe3cf" />
-      <circle cx="50" cy="48" r="36" fill="#ffe8d6" />
-      <Hair m={m} />
-      <Eyes mood={mood} />
-      <ellipse cx="28" cy="58" rx="6" ry={mood === 'blush' ? 5 : 3.5} fill="#f6a5bd" opacity={mood === 'blush' ? 0.95 : 0.6} />
-      <ellipse cx="72" cy="58" rx="6" ry={mood === 'blush' ? 5 : 3.5} fill="#f6a5bd" opacity={mood === 'blush' ? 0.95 : 0.6} />
-      <Mouth mood={mood} />
-      <text x="50" y="112" fontSize="16" textAnchor="middle">{m.emoji}</text>
-    </svg>
-  );
-}
 
 const FX_CHARS: Record<ShipAction['fx'], string[]> = {
   hearts: ['💜', '💗', '💕', '🩷', '💞'],
@@ -106,7 +35,7 @@ export function ShipsTab() {
   const group = n > 2;
   const line = action ? actionLine(action, names, run) : `Elegí qué hacen ${joinNames(names)} 💜`;
   const pct = compatibility(...sel);
-  const size = Math.min(110, Math.floor(380 / n));
+  const size = Math.min(120, Math.floor(440 / n));
 
   const fx = useMemo(
     () =>
@@ -169,7 +98,7 @@ export function ShipsTab() {
             className={`ship-pick ${sel.includes(m.id) ? 'on' : ''}`}
             onClick={() => toggle(m.id)}
           >
-            <Chibi m={m} size={38} />
+            <ShipCharacter m={m} size={40} bust />
             <span>{m.name}</span>
           </button>
         ))}
@@ -196,7 +125,7 @@ export function ShipsTab() {
               className={`ship-chibi ${i === 0 ? 'lead' : ''}`}
               style={{ '--off': (n - 1) / 2 - i, '--size': `${size}px`, animationDelay: action?.id === 'baile' || action?.id === 'abrazo' ? undefined : `${i * 0.06}s` } as CSSProperties}
             >
-              <Chibi m={m} mood={(i === 0 ? action?.moodA : action?.moodB) ?? 'happy'} size={size} />
+              <ShipCharacter m={m} mood={(i === 0 ? action?.moodA : action?.moodB) ?? 'happy'} size={size} />
               <span className="ship-name">{names[i]}</span>
             </div>
           ))}
