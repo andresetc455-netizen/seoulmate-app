@@ -20,12 +20,22 @@ test('ships: acciones animadas y apodos con filtro', async ({ page }) => {
   await expect(page.getByText(/se dan un beso|roba un beso|besó a/)).toBeVisible();
   await page.waitForTimeout(1400);
   await page.evaluate(() => window.scrollTo(0, 0)); await page.screenshot({ path: 'docs/screenshots/35-ships-beso.png' });
-  await page.getByRole('radiogroup', { name: 'Primero' }).getByRole('radio', { name: 'V' }).click();
+  const picker = page.getByRole('group', { name: 'Integrantes del ship' });
+  await picker.getByRole('button', { name: 'V', exact: true }).click();
+  await expect(page.getByRole('heading', { name: /Maknae Line/ })).toBeVisible();
   await page.getByRole('button', { name: /Bajo la lluvia/ }).click();
   await page.waitForTimeout(1400);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: 'docs/screenshots/36-ships-lluvia.png' });
 
+  await page.getByRole('button', { name: /Abrazo grupal/ }).click();
+  await expect(page.getByText(/Abrazo grupal!|no los suelta/)).toBeVisible();
+  await page.getByRole('button', { name: 'Todos (OT7)' }).click();
+  await page.getByRole('button', { name: /Baile en ronda/ }).click();
+  await expect(page.getByRole('heading', { name: /OT7/ })).toBeVisible();
+  await page.waitForTimeout(1400);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: 'docs/screenshots/38-ships-ot7.png' });
   await page.getByRole('button', { name: 'Editar' }).click();
   const jk = page.getByPlaceholder('Jung Kook');
   await jk.fill('mi amor');

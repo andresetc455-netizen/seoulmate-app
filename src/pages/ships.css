@@ -1,7 +1,8 @@
 .ship-head { text-align: center; }
 .ship-title { font-family: var(--serif); color: var(--violet-deep); margin: 0 0 4px; font-size: 1.6rem; }
 
-.ship-pickers { display: grid; gap: 8px; margin-bottom: 12px; }
+.ship-pickrow { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.ship-picker { margin-bottom: 12px; }
 .ship-picker { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
 .ship-picker::-webkit-scrollbar { display: none; }
 .ship-pick {
@@ -25,32 +26,35 @@
 .scene-night .ship-name { color: #fff; background: rgba(255, 255, 255, 0.15); }
 
 .ship-pair { position: absolute; inset: auto 0 10px; display: flex; justify-content: center; align-items: flex-end; }
-.ship-chibi { display: flex; flex-direction: column; align-items: center; transition: transform 0.6s; }
-.ship-chibi .chibi-svg { width: 110px; height: 143px; }
+.ship-chibi {
+  --step-close: calc(var(--size) * 0.25); --step-touch: calc(var(--size) * 0.6);
+  display: flex; flex-direction: column; align-items: center; margin: 0 calc(var(--size) * -0.1);
+}
+.ship-chibi .chibi-svg { width: var(--size); height: calc(var(--size) * 1.3); }
+.is-group .ship-chibi { --step-close: calc(var(--size) * 0.12); --step-touch: calc(var(--size) * 0.22); }
+.is-crowd .ship-name { font-size: 0.6rem; padding: 1px 4px; max-width: calc(var(--size) * 1.1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ship-name {
   font-weight: 700; font-size: 0.75rem; color: var(--violet-deep); background: rgba(255, 255, 255, 0.7);
   padding: 2px 8px; border-radius: 999px; margin-top: -6px; max-width: 120px; text-align: center;
 }
-.ship-mid { font-size: 1.6rem; width: 50px; text-align: center; align-self: center; animation: pop 0.6s ease-out both; }
+.ship-mid { position: absolute; left: 50%; top: 34%; margin-left: -20px; width: 40px; font-size: 1.6rem; text-align: center; z-index: 2; animation: pop 0.6s ease-out both; }
 
 /* acercarse */
-.move-close .left { animation: closeL 0.9s ease-out forwards; }
-.move-close .right { animation: closeR 0.9s ease-out forwards; }
-.move-touch .left { animation: touchL 1s ease-out forwards; }
-.move-touch .right { animation: touchR 1s ease-out forwards; }
-.move-touch .ship-mid { animation: popMid 1s ease-out 0.6s both; position: relative; z-index: 2; }
-@keyframes closeL { to { transform: translateX(14px); } }
-@keyframes closeR { to { transform: translateX(-14px); } }
-@keyframes touchL { to { transform: translateX(34px) rotate(8deg); } }
-@keyframes touchR { to { transform: translateX(-34px) rotate(-8deg); } }
+.move-close .ship-chibi { animation: closeIn 0.9s ease-out forwards; }
+.move-touch .ship-chibi { animation: touchIn 1s ease-out forwards; }
+.move-touch .ship-mid { animation: popMid 1s ease-out 0.6s both; }
+@keyframes closeIn { to { transform: translateX(calc(var(--off) * var(--step-close))); } }
+@keyframes touchIn { to { transform: translateX(calc(var(--off) * var(--step-touch))) rotate(calc(var(--off) * 16deg)); } }
+.is-group.move-touch .ship-chibi { animation-name: touchInGroup; }
+@keyframes touchInGroup { to { transform: translateX(calc(var(--off) * var(--step-touch))) rotate(calc(var(--off) * 5deg)); } }
 @keyframes pop { from { transform: scale(0); } 70% { transform: scale(1.3); } to { transform: scale(1); } }
-@keyframes popMid { from { transform: scale(0) translateY(0); } 60% { transform: scale(1.6) translateY(-40px); } to { transform: scale(1.2) translateY(-60px); } }
+@keyframes popMid { from { transform: scale(0); } 60% { transform: scale(1.6) translateY(-20px); } to { transform: scale(1.2) translateY(-30px); } }
 
 /* bailes y serenata */
 .act-baile .ship-pair { animation: sway 1.4s ease-in-out 1s infinite; }
 .act-abrazo .ship-pair { animation: squish 0.8s ease-in-out 1s 2; }
-.act-serenata .left { animation: bounce 0.6s ease-in-out infinite; }
-.act-serenata .right { animation: sway 1.6s ease-in-out infinite; }
+.act-serenata .ship-chibi { animation: sway 1.6s ease-in-out infinite; }
+.act-serenata .ship-chibi.lead { animation: bounce 0.6s ease-in-out infinite; }
 .act-boda .ship-pair { animation: bounce 0.8s ease-in-out 1s 3; }
 @keyframes sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
 @keyframes squish { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08, 0.94); } }

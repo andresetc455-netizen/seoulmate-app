@@ -91,13 +91,34 @@ export function pairKey(a: string, b: string): string {
   return [a, b].sort().join('+');
 }
 
-export function shipName(a: string, b: string): string {
-  return KNOWN[pairKey(a, b)] ?? `${memberById(a)?.name ?? a} × ${memberById(b)?.name ?? b}`;
+// Subgrupos conocidos por ARMY.
+const GROUPS: Record<string, string> = {
+  'jimin+jk+v': 'Maknae Line',
+  'jhope+jin+rm+suga': 'Hyung Line',
+  'jhope+rm+suga': 'Rap Line',
+  'jimin+jin+jk+v': 'Vocal Line',
+  'jin+rm+suga': 'Hyung Line (sin Hobi)',
+  'jhope+jimin+jk+v': 'Dance & Maknae',
+};
+
+export function groupKey(ids: string[]): string {
+  return [...ids].sort().join('+');
+}
+
+export function shipName(...ids: string[]): string {
+  if (ids.length === 2) return KNOWN[pairKey(ids[0], ids[1])] ?? `${memberById(ids[0])?.name ?? ids[0]} × ${memberById(ids[1])?.name ?? ids[1]}`;
+  if (ids.length === SHIP_MEMBERS.length) return 'OT7';
+  return GROUPS[groupKey(ids)] ?? `OT${ids.length}`;
+}
+
+/** "A, B y C" */
+export function joinNames(names: string[]): string {
+  return names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} y ${names[names.length - 1]}`;
 }
 
 /** Compatibilidad fija por pareja (siempre alta, porque el amor gana). */
-export function compatibility(a: string, b: string): number {
-  const k = pairKey(a, b);
+export function compatibility(...ids: string[]): number {
+  const k = groupKey(ids);
   let h = 7;
   for (const c of k) h = (h * 31 + c.charCodeAt(0)) % 1000;
   return 82 + (h % 18);
@@ -118,56 +139,72 @@ export interface ShipAction {
   moodA: Mood;
   moodB: Mood;
   lines: string[]; // {a} y {b}
+  groupLines: string[]; // {todos}, {a} (el primero) y {resto}
 }
 
 export const SHIP_ACTIONS: ShipAction[] = [
   {
     id: 'beso', label: 'Beso', emoji: '💋', move: 'touch', fx: 'hearts', moodA: 'kiss', moodB: 'kiss',
     lines: ['{a} y {b} se dan un beso de película 💋', '{a} le roba un beso a {b} y los dos se ponen rojos 😳', 'Muak 💜 {a} besó a {b} delante de ARMY'],
+    groupLines: ['Ronda de besos: {todos} se dan besitos uno por uno 💋', '{a} le da un beso a cada uno: {resto} no saben dónde meterse 😳'],
   },
   {
     id: 'mejilla', label: 'Besito en el cachete', emoji: '😚', move: 'touch', fx: 'sparkles', moodA: 'kiss', moodB: 'blush',
     lines: ['{a} le da un besito en el cachete a {b}, que no sabe dónde meterse 🙈', '{b} recibe un piquito sorpresa de {a} 😚'],
+    groupLines: ['Ronda de besitos en el cachete entre {todos} 😚', '{resto} le llenan los cachetes de besitos a {a} 🙈'],
   },
   {
     id: 'abrazo', label: 'Abrazo', emoji: '🤗', move: 'touch', fx: 'hearts', moodA: 'happy', moodB: 'love',
     lines: ['{a} abraza fuerte a {b} y no lo suelta más 🤗', 'Abrazo de oso entre {a} y {b} 🧸'],
+    groupLines: ['¡Abrazo grupal! {todos} todos apretujados 🤗', '{a} abraza a {resto} y no los suelta más 🧸'],
   },
   {
     id: 'mano', label: 'De la mano', emoji: '🫶', move: 'close', fx: 'sparkles', prop: '🫶', moodA: 'blush', moodB: 'blush',
     lines: ['{a} y {b} se toman de la mano “sin querer” 🫶', '{a} entrelaza los dedos con {b} en pleno ensayo 👀'],
+    groupLines: ['{todos} hacen una ronda de la mano 🫶', '{a} agarra de la mano a {resto} y salen a pasear 💜'],
   },
   {
     id: 'cita', label: 'Cita en un café', emoji: '☕', move: 'close', fx: 'hearts', scene: 'cafe', prop: '☕🍰', moodA: 'love', moodB: 'happy',
     lines: ['{a} invita a {b} a un café en Seúl ☕', 'Cita secreta: {a} y {b} comparten una torta de frutilla 🍰'],
+    groupLines: ['Cita múltiple en un café: {todos} comparten una torta gigante 🍰', '{a} invita a {resto} a tomar un café ☕'],
   },
   {
     id: 'baile', label: 'Baile lento', emoji: '💃', move: 'touch', fx: 'notes', moodA: 'love', moodB: 'love',
     lines: ['{a} y {b} bailan lento como en un dorama 🎶', '{a} saca a bailar a {b} y lo hace girar 💫'],
+    groupLines: ['{todos} bailan lento en ronda 🎶', 'Coreografía romántica: {a} baila con {resto} 💫'],
   },
   {
     id: 'serenata', label: 'Serenata', emoji: '🎤', move: 'none', fx: 'notes', prop: '🎤', moodA: 'happy', moodB: 'love',
     lines: ['{a} le canta una serenata a {b} 🎤', '{a} le dedica una canción a {b} y ARMY grita 😭'],
+    groupLines: ['{a} les canta una serenata a {resto} 🎤', '{todos} cantan juntos una canción de amor 🎶'],
   },
   {
     id: 'paraguas', label: 'Bajo la lluvia', emoji: '☂️', move: 'touch', fx: 'rain', scene: 'rain', prop: '☂️', moodA: 'blush', moodB: 'love',
     lines: ['{a} comparte el paraguas con {b}, bien pegaditos ☂️', 'Escena de K-drama: {a} y {b} bajo la lluvia 🌧️'],
+    groupLines: ['{todos} se apretujan bajo un solo paraguas ☂️', '{a} intenta tapar a {resto} con su paraguas y nadie entra 😂'],
   },
   {
     id: 'estrellas', label: 'Mirar estrellas', emoji: '🌙', move: 'close', fx: 'stars', scene: 'night', moodA: 'love', moodB: 'love',
     lines: ['{a} y {b} miran las estrellas en el Han 🌙', '{a} le dice a {b} que es su estrella favorita ✨'],
+    groupLines: ['{todos} miran las estrellas acostados en el Han 🌙', '{a} le pide un deseo a una estrella por {resto} ✨'],
   },
   {
     id: 'picnic', label: 'Picnic', emoji: '🧺', move: 'close', fx: 'petals', scene: 'park', prop: '🧺🍓', moodA: 'happy', moodB: 'happy',
     lines: ['{a} le da frutillas en la boca a {b} 🍓', 'Picnic bajo los cerezos para {a} y {b} 🌸'],
+    groupLines: ['Picnic gigante bajo los cerezos para {todos} 🌸', '{a} le da frutillas en la boca a {resto} 🍓'],
   },
   {
     id: 'boda', label: 'Casamiento', emoji: '💍', move: 'touch', fx: 'petals', scene: 'wedding', prop: '💍', moodA: 'love', moodB: 'love',
     lines: ['¡Sí, quiero! {a} y {b} se casan 💍', '{a} se arrodilla y le pide casamiento a {b} 💐'],
+    groupLines: ['¡Casamiento múltiple! {todos} dicen “sí, quiero” 💍', '{a} les pide casamiento a {resto} y todos dicen que sí 💐'],
   },
 ];
 
-export function actionLine(action: ShipAction, a: string, b: string, i = 0): string {
-  const l = action.lines[i % action.lines.length];
-  return l.replaceAll('{a}', a).replaceAll('{b}', b);
+export function actionLine(action: ShipAction, names: string[], i = 0): string {
+  if (names.length === 2) {
+    const l = action.lines[i % action.lines.length];
+    return l.replaceAll('{a}', names[0]).replaceAll('{b}', names[1]);
+  }
+  const l = action.groupLines[i % action.groupLines.length];
+  return l.replaceAll('{todos}', joinNames(names)).replaceAll('{a}', names[0]).replaceAll('{resto}', joinNames(names.slice(1)));
 }

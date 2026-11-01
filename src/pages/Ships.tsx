@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { useDoc } from '../lib/store';
 import { btsDoc } from '../lib/docs';
 import { toast } from '../components/ui';
 import {
   SHIP_ACTIONS, SHIP_MEMBERS, FORBIDDEN_NICKNAME_MSG, NICKNAME_MAX, actionLine, compatibility, displayName,
-  isForbiddenNickname, memberById, nicknamesOf, shipName, type Mood, type ShipAction, type ShipMember,
+  isForbiddenNickname, joinNames, memberById, nicknamesOf, shipName, type Mood, type ShipAction, type ShipMember,
 } from '../lib/ships';
 import './ships.css';
 
@@ -90,43 +90,45 @@ const FX_CHARS: Record<ShipAction['fx'], string[]> = {
 };
 
 // ---------- Sección ----------
+const ORDER = SHIP_MEMBERS.map((m) => m.id);
+
 export function ShipsTab() {
   const data = useDoc(btsDoc);
   const nicks = data.nicknames;
-  const [a, setA] = useState('jimin');
-  const [b, setB] = useState('jk');
+  const [sel, setSel] = useState<string[]>(['jimin', 'jk']);
   const [action, setAction] = useState<ShipAction | null>(null);
   const [run, setRun] = useState(0);
   const [editing, setEditing] = useState(false);
 
-  const ma = memberById(a)!;
-  const mb = memberById(b)!;
-  const na = displayName(a, nicks);
-  const nb = displayName(b, nicks);
-  const line = action ? actionLine(action, na, nb, run) : `Elegí qué hacen ${na} y ${nb} 💜`;
-  const pct = compatibility(a, b);
+  const members = sel.map((id) => memberById(id)!);
+  const names = sel.map((id) => displayName(id, nicks));
+  const n = sel.length;
+  const group = n > 2;
+  const line = action ? actionLine(action, names, run) : `Elegí qué hacen ${joinNames(names)} 💜`;
+  const pct = compatibility(...sel);
+  const size = Math.min(110, Math.floor(380 / n));
 
   const fx = useMemo(
     () =>
       action
-        ? Array.from({ length: 14 }, (_, i) => ({
+        ? Array.from({ length: 14 + n * 2 }, (_, i) => ({
             ch: FX_CHARS[action.fx][i % FX_CHARS[action.fx].length],
             left: (i * 37 + run * 13) % 92,
             delay: (i % 7) * 0.22,
             dur: 2.2 + (i % 4) * 0.4,
           }))
         : [],
-    [action, run],
+    [action, run, n],
   );
 
-  const pick = (side: 'a' | 'b', id: string) => {
-    if (side === 'a') {
-      if (id === b) setB(a);
-      setA(id);
-    } else {
-      if (id === a) setA(b);
-      setB(id);
-    }
+  const toggle = (id: string) => {
+    if (sel.includes(id)) {
+      if (n <= 2) {
+        toast('Un ship necesita al menos dos 💜');
+        return;
+      }
+      setSel(sel.filter((x) => x !== id));
+    } else setSel(ORDER.filter((x) => x === id || sel.includes(x)));
     setAction(null);
   };
 
@@ -136,32 +138,46 @@ export function ShipsTab() {
   };
 
   const surprise = () => {
-    const ids = SHIP_MEMBERS.map((m) => m.id);
-    const x = ids[Math.floor(Math.random() * ids.length)];
-    let y = x;
-    while (y === x) y = ids[Math.floor(Math.random() * ids.length)];
-    setA(x);
-    setB(y);
+    const k = Math.random() < 0.15 ? 7 : 2 + Math.floor(Math.random() * 3);
+    const shuffled = [...ORDER].sort(() => Math.random() - 0.5).slice(0, k);
+    setSel(ORDER.filter((x) => shuffled.includes(x)));
     doAction(SHIP_ACTIONS[Math.floor(Math.random() * SHIP_ACTIONS.length)]);
   };
 
   return (
     <div className="ships">
       <div className="card rose ship-head">
-        <h2 className="ship-title">{shipName(a, b)} 💞</h2>
+        <h2 className="ship-title">{shipName(...sel)} 💞</h2>
         <p className="small muted" style={{ margin: 0 }}>
-          Compatibilidad: <strong>{pct}%</strong> {pct > 94 ? '· almas gemelas 💍' : '· química total ✨'}
+          Compatibilidad{group ? ' grupal' : ''}: <strong>{pct}%</strong> {pct > 94 ? '· almas gemelas 💍' : '· química total ✨'}
         </p>
       </div>
 
-      <div className="ship-pickers">
-        <MemberPicker label="Primero" value={a} nicks={nicks} onPick={(id) => pick('a', id)} />
-        <MemberPicker label="Segundo" value={b} nicks={nicks} onPick={(id) => pick('b', id)} />
+      <div className="ship-pickrow">
+        <span className="small muted">Tocá a 2 o más ({n} elegidos)</span>
+        <button type="button" className="btn sm secondary" onClick={() => { setSel([...ORDER]); setAction(null); }} disabled={n === 7}>
+          Todos (OT7)
+        </button>
+      </div>
+      <div className="ship-picker" role="group" aria-label="Integrantes del ship">
+        {SHIP_MEMBERS.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            aria-pressed={sel.includes(m.id)}
+            aria-label={displayName(m.id, nicks)}
+            className={`ship-pick ${sel.includes(m.id) ? 'on' : ''}`}
+            onClick={() => toggle(m.id)}
+          >
+            <Chibi m={m} size={38} />
+            <span>{m.name}</span>
+          </button>
+        ))}
       </div>
 
       <div
         key={run}
-        className={`ship-stage scene-${action?.scene ?? 'stage'} ${action ? `move-${action.move} act-${action.id}` : ''}`}
+        className={`ship-stage scene-${action?.scene ?? 'stage'} ${action ? `move-${action.move} act-${action.id}` : ''} ${group ? 'is-group' : ''} ${n >= 5 ? 'is-crowd' : ''}`}
         data-testid="ship-stage"
       >
         <div className="ship-fx" aria-hidden="true">
@@ -172,16 +188,18 @@ export function ShipsTab() {
           ))}
         </div>
         {action?.prop && <div className="ship-prop" aria-hidden="true">{action.prop}</div>}
+        <div className="ship-mid" aria-hidden="true">{action ? action.emoji : '💜'}</div>
         <div className="ship-pair">
-          <div className="ship-chibi left">
-            <Chibi m={ma} mood={action?.moodA ?? 'happy'} />
-            <span className="ship-name">{na}</span>
-          </div>
-          <div className="ship-mid" aria-hidden="true">{action ? action.emoji : '💜'}</div>
-          <div className="ship-chibi right">
-            <Chibi m={mb} mood={action?.moodB ?? 'happy'} />
-            <span className="ship-name">{nb}</span>
-          </div>
+          {members.map((m, i) => (
+            <div
+              key={m.id}
+              className={`ship-chibi ${i === 0 ? 'lead' : ''}`}
+              style={{ '--off': (n - 1) / 2 - i, '--size': `${size}px`, animationDelay: action?.id === 'baile' || action?.id === 'abrazo' ? undefined : `${i * 0.06}s` } as CSSProperties}
+            >
+              <Chibi m={m} mood={(i === 0 ? action?.moodA : action?.moodB) ?? 'happy'} size={size} />
+              <span className="ship-name">{names[i]}</span>
+            </div>
+          ))}
         </div>
       </div>
       <p className="ship-line" aria-live="polite">{line}</p>
@@ -190,7 +208,7 @@ export function ShipsTab() {
         {SHIP_ACTIONS.map((act) => (
           <button key={act.id} type="button" className={`ship-act ${action?.id === act.id ? 'on' : ''}`} onClick={() => doAction(act)}>
             <span className="ship-act-emoji">{act.emoji}</span>
-            {act.label}
+            {group ? (GROUP_LABELS[act.id] ?? act.label) : act.label}
           </button>
         ))}
       </div>
@@ -213,28 +231,15 @@ export function ShipsTab() {
   );
 }
 
-function MemberPicker({
-  label, value, nicks, onPick,
-}: { label: string; value: string; nicks: Record<string, string> | undefined; onPick: (id: string) => void }) {
-  return (
-    <div className="ship-picker" role="radiogroup" aria-label={label}>
-      {SHIP_MEMBERS.map((m) => (
-        <button
-          key={m.id}
-          type="button"
-          role="radio"
-          aria-checked={value === m.id}
-          aria-label={displayName(m.id, nicks)}
-          className={`ship-pick ${value === m.id ? 'on' : ''}`}
-          onClick={() => onPick(m.id)}
-        >
-          <Chibi m={m} size={38} />
-          <span>{m.name}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
+const GROUP_LABELS: Record<string, string> = {
+  beso: 'Ronda de besos',
+  mejilla: 'Ronda de besitos',
+  abrazo: 'Abrazo grupal',
+  mano: 'Ronda de la mano',
+  cita: 'Cita grupal',
+  baile: 'Baile en ronda',
+  boda: 'Casamiento múltiple',
+};
 
 function NicknameEditor({ saved }: { saved: Record<string, string> | undefined }) {
   const [draft, setDraft] = useState<Record<string, string>>(() => ({ ...nicknamesOf(saved) }));
