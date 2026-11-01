@@ -16,6 +16,7 @@ test('ships: acciones animadas y apodos con filtro', async ({ page }) => {
   await page.goto('./#/bts?tab=ships');
   await expect(page.getByRole('heading', { name: /Jikook/ })).toBeVisible();
   await expect(page.getByText('Hadita tucumana').first()).toBeVisible();
+  await page.getByTestId('ship-stage').screenshot({ path: 'docs/screenshots/40-ships-retrato.png' });
   await page.getByRole('button', { name: /Beso$/ }).click();
   await expect(page.getByText(/se dan un beso|roba un beso|besó a/)).toBeVisible();
   await page.waitForTimeout(1400);

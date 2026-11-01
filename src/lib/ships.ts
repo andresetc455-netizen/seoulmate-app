@@ -5,19 +5,20 @@ export interface ShipMember {
   name: string;
   emoji: string;
   hair: string;
+  iris: string;
   number: number; // dorsal: el día de su cumpleaños
   style: 'sweep' | 'soft' | 'curtain' | 'curly' | 'fluffy' | 'wavy' | 'mullet';
   extra?: 'dimples' | 'mole' | 'earring';
 }
 
 export const SHIP_MEMBERS: ShipMember[] = [
-  { id: 'rm', name: 'RM', emoji: '🐨', hair: '#3b2f2f', number: 12, style: 'sweep', extra: 'dimples' },
-  { id: 'jin', name: 'Jin', emoji: '🐹', hair: '#5b3a2e', number: 4, style: 'soft' },
-  { id: 'suga', name: 'SUGA', emoji: '🐱', hair: '#8fd3c1', number: 9, style: 'curtain' },
-  { id: 'jhope', name: 'j-hope', emoji: '🐿️', hair: '#7a4630', number: 18, style: 'curly' },
-  { id: 'jimin', name: 'Jimin', emoji: '🐥', hair: '#e8cf8f', number: 13, style: 'fluffy' },
-  { id: 'v', name: 'V', emoji: '🐯', hair: '#2c3150', number: 30, style: 'wavy', extra: 'mole' },
-  { id: 'jk', name: 'Jung Kook', emoji: '🐰', hair: '#1b1820', number: 1, style: 'mullet', extra: 'earring' },
+  { id: 'rm', iris: '#5a3d2b', name: 'RM', emoji: '🐨', hair: '#3b2f2f', number: 12, style: 'sweep', extra: 'dimples' },
+  { id: 'jin', iris: '#4a2f22', name: 'Jin', emoji: '🐹', hair: '#5b3a2e', number: 4, style: 'soft' },
+  { id: 'suga', iris: '#3b2a20', name: 'SUGA', emoji: '🐱', hair: '#8fd3c1', number: 9, style: 'curtain' },
+  { id: 'jhope', iris: '#6a4630', name: 'j-hope', emoji: '🐿️', hair: '#7a4630', number: 18, style: 'curly' },
+  { id: 'jimin', iris: '#5c3a28', name: 'Jimin', emoji: '🐥', hair: '#e8cf8f', number: 13, style: 'fluffy' },
+  { id: 'v', iris: '#3d2a20', name: 'V', emoji: '🐯', hair: '#2c3150', number: 30, style: 'wavy', extra: 'mole' },
+  { id: 'jk', iris: '#2e1f17', name: 'Jung Kook', emoji: '🐰', hair: '#1b1820', number: 1, style: 'mullet', extra: 'earring' },
 ];
 
 export const DEFAULT_NICKNAMES: Record<string, string> = { jimin: 'Hadita tucumana' };
@@ -127,7 +128,7 @@ export function compatibility(...ids: string[]): number {
 
 export type Fx = 'hearts' | 'notes' | 'rain' | 'petals' | 'stars' | 'sparkles';
 export type Move = 'none' | 'close' | 'touch';
-export type Mood = 'love' | 'kiss' | 'blush' | 'happy';
+export type Mood = 'love' | 'kiss' | 'blush' | 'happy' | 'smile';
 
 export interface ShipAction {
   id: string;

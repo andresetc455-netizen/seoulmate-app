@@ -35,7 +35,7 @@ export function ShipsTab() {
   const group = n > 2;
   const line = action ? actionLine(action, names, run) : `Elegí qué hacen ${joinNames(names)} 💜`;
   const pct = compatibility(...sel);
-  const size = Math.min(120, Math.floor(440 / n));
+  const size = Math.min(115, Math.floor(430 / n));
 
   const fx = useMemo(
     () =>
@@ -98,7 +98,7 @@ export function ShipsTab() {
             className={`ship-pick ${sel.includes(m.id) ? 'on' : ''}`}
             onClick={() => toggle(m.id)}
           >
-            <ShipCharacter m={m} size={40} bust />
+            <ShipCharacter m={m} size={40} mood="smile" bust />
             <span>{m.name}</span>
           </button>
         ))}
@@ -125,7 +125,7 @@ export function ShipsTab() {
               className={`ship-chibi ${i === 0 ? 'lead' : ''}`}
               style={{ '--off': (n - 1) / 2 - i, '--size': `${size}px`, animationDelay: action?.id === 'baile' || action?.id === 'abrazo' ? undefined : `${i * 0.06}s` } as CSSProperties}
             >
-              <ShipCharacter m={m} mood={(i === 0 ? action?.moodA : action?.moodB) ?? 'happy'} size={size} />
+              <ShipCharacter m={m} mood={(i === 0 ? action?.moodA : action?.moodB) ?? 'smile'} size={size} />
               <span className="ship-name">{names[i]}</span>
             </div>
           ))}
