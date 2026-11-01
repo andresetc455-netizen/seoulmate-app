@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useDoc, upsert, removeById, newId } from '../lib/store';
 import { btsDoc } from '../lib/docs';
 import { validate, hasErrors } from '../lib/validation';
@@ -13,12 +14,14 @@ import { Blossom, Star4, HeartDeco } from '../components/deco';
 import { isYouTubeLink, musicSearchUrl } from '../lib/youtube';
 import { playQueue, type Track } from '../lib/player';
 import { saveImageFile } from '../lib/media';
+import { ShipsTab } from './Ships';
 import './bts.css';
 
-type BtsTab = 'musica' | 'integrantes' | 'photocards' | 'recuerdos' | 'listas';
+type BtsTab = 'musica' | 'integrantes' | 'photocards' | 'recuerdos' | 'listas' | 'ships';
 
 export function BtsPage() {
-  const [tab, setTab] = useState<BtsTab>('musica');
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<BtsTab>(params.get('tab') === 'ships' ? 'ships' : 'musica');
   return (
     <div className="page">
       <p className="small muted" style={{ marginTop: 0 }}>
@@ -29,6 +32,7 @@ export function BtsPage() {
         value={tab}
         onChange={setTab}
         tabs={[
+          { id: 'ships', label: 'Ships 💞' },
           { id: 'musica', label: 'Música' },
           { id: 'integrantes', label: 'Integrantes' },
           { id: 'photocards', label: 'Photocards' },
@@ -41,6 +45,7 @@ export function BtsPage() {
       {tab === 'photocards' && <Photocards />}
       {tab === 'recuerdos' && <Memories />}
       {tab === 'listas' && <Lists />}
+      {tab === 'ships' && <ShipsTab />}
     </div>
   );
 }

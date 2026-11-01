@@ -67,6 +67,7 @@ export interface BtsData {
   photocards: Photocard[];
   memories: FanMemory[];
   lists: FanList[];
+  nicknames?: Record<string, string>; // apodos editables para la sección Ships
 }
 
 // ---------- K-Drama Diary ----------

@@ -1,0 +1,92 @@
+.ship-head { text-align: center; }
+.ship-title { font-family: var(--serif); color: var(--violet-deep); margin: 0 0 4px; font-size: 1.6rem; }
+
+.ship-pickers { display: grid; gap: 8px; margin-bottom: 12px; }
+.ship-picker { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.ship-picker::-webkit-scrollbar { display: none; }
+.ship-pick {
+  flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  border: 1.5px solid var(--lavender-soft); background: #fff; border-radius: 14px;
+  padding: 4px 6px 6px; font-size: 0.7rem; font-weight: 700; color: var(--muted); cursor: pointer; min-width: 54px;
+}
+.ship-pick.on { border-color: var(--violet); background: var(--lavender-mist); color: var(--violet-deep); }
+.ship-pick svg { height: 44px; width: 38px; }
+
+.ship-stage {
+  position: relative; overflow: hidden; border-radius: var(--radius); height: 250px;
+  background: linear-gradient(180deg, var(--lavender-soft) 0%, var(--rose-soft) 100%);
+  box-shadow: var(--shadow-sm); transition: background 0.6s;
+}
+.scene-cafe { background: linear-gradient(180deg, #f6e2cf 0%, #fdf6d8 100%); }
+.scene-night { background: linear-gradient(180deg, #2c2450 0%, #5e4b8b 100%); }
+.scene-rain { background: linear-gradient(180deg, #b9c5dc 0%, #e6ecf5 100%); }
+.scene-park { background: linear-gradient(180deg, #fde4ee 0%, #e4f3df 100%); }
+.scene-wedding { background: radial-gradient(circle at 50% 30%, #fff 0%, var(--butter-soft) 60%, var(--rose-soft) 100%); }
+.scene-night .ship-name { color: #fff; background: rgba(255, 255, 255, 0.15); }
+
+.ship-pair { position: absolute; inset: auto 0 10px; display: flex; justify-content: center; align-items: flex-end; }
+.ship-chibi { display: flex; flex-direction: column; align-items: center; transition: transform 0.6s; }
+.ship-chibi .chibi-svg { width: 110px; height: 143px; }
+.ship-name {
+  font-weight: 700; font-size: 0.75rem; color: var(--violet-deep); background: rgba(255, 255, 255, 0.7);
+  padding: 2px 8px; border-radius: 999px; margin-top: -6px; max-width: 120px; text-align: center;
+}
+.ship-mid { font-size: 1.6rem; width: 50px; text-align: center; align-self: center; animation: pop 0.6s ease-out both; }
+
+/* acercarse */
+.move-close .left { animation: closeL 0.9s ease-out forwards; }
+.move-close .right { animation: closeR 0.9s ease-out forwards; }
+.move-touch .left { animation: touchL 1s ease-out forwards; }
+.move-touch .right { animation: touchR 1s ease-out forwards; }
+.move-touch .ship-mid { animation: popMid 1s ease-out 0.6s both; position: relative; z-index: 2; }
+@keyframes closeL { to { transform: translateX(14px); } }
+@keyframes closeR { to { transform: translateX(-14px); } }
+@keyframes touchL { to { transform: translateX(34px) rotate(8deg); } }
+@keyframes touchR { to { transform: translateX(-34px) rotate(-8deg); } }
+@keyframes pop { from { transform: scale(0); } 70% { transform: scale(1.3); } to { transform: scale(1); } }
+@keyframes popMid { from { transform: scale(0) translateY(0); } 60% { transform: scale(1.6) translateY(-40px); } to { transform: scale(1.2) translateY(-60px); } }
+
+/* bailes y serenata */
+.act-baile .ship-pair { animation: sway 1.4s ease-in-out 1s infinite; }
+.act-abrazo .ship-pair { animation: squish 0.8s ease-in-out 1s 2; }
+.act-serenata .left { animation: bounce 0.6s ease-in-out infinite; }
+.act-serenata .right { animation: sway 1.6s ease-in-out infinite; }
+.act-boda .ship-pair { animation: bounce 0.8s ease-in-out 1s 3; }
+@keyframes sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes squish { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08, 0.94); } }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+.ship-prop {
+  position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font-size: 2.4rem;
+  animation: pop 0.6s ease-out 0.4s both;
+}
+.act-paraguas .ship-prop { top: 44px; font-size: 4.4rem; }
+.act-serenata .ship-prop { left: 26%; top: 60px; }
+
+.ship-fx { position: absolute; inset: 0; pointer-events: none; }
+.ship-fx span { position: absolute; bottom: -30px; font-size: 1.3rem; animation: floatUp 2.6s ease-in infinite; opacity: 0; }
+.ship-fx .fx-rain, .ship-fx .fx-petals { bottom: auto; top: -30px; animation-name: fallDown; }
+.ship-fx .fx-stars { bottom: auto; top: 10%; animation-name: twinkle; }
+@keyframes floatUp { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-260px) scale(1.1); opacity: 0; } }
+@keyframes fallDown { 0% { transform: translateY(0) rotate(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(280px) rotate(180deg); opacity: 0; } }
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } }
+
+.ship-line { text-align: center; font-weight: 700; color: var(--violet-deep); min-height: 2.6em; margin: 10px 4px; }
+
+.ship-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ship-act {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; border: 1.5px solid var(--lavender-soft);
+  background: #fff; border-radius: 14px; padding: 8px 4px; font-size: 0.75rem; font-weight: 700; color: var(--ink); cursor: pointer;
+}
+.ship-act.on { border-color: var(--rose-deep); background: var(--rose-soft); }
+.ship-act:active { transform: scale(0.96); }
+.ship-act-emoji { font-size: 1.4rem; }
+
+.nick-form { display: grid; gap: 8px; margin-top: 10px; }
+.nick-row { display: grid; gap: 4px; }
+.nick-label { font-size: 0.8rem; font-weight: 700; color: var(--violet-deep); }
+.nick-error { color: var(--danger); font-weight: 700; font-size: 0.8rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ship-stage *, .ship-stage { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; }
+}
