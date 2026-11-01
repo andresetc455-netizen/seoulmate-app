@@ -17,6 +17,8 @@ test('ships: acciones animadas y apodos con filtro', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Jikook/ })).toBeVisible();
   await expect(page.getByText('Hadita tucumana').first()).toBeVisible();
   await page.getByTestId('ship-stage').screenshot({ path: 'docs/screenshots/40-ships-retrato.png' });
+  const box = (await page.getByTestId('ship-stage').boundingBox())!;
+  await page.screenshot({ path: 'docs/screenshots/41-ships-caras.png', clip: { x: box.x + box.width * 0.25, y: box.y + 20, width: box.width * 0.5, height: 80 } });
   await page.getByRole('button', { name: /Beso$/ }).click();
   await expect(page.getByText(/se dan un beso|roba un beso|besó a/)).toBeVisible();
   await page.waitForTimeout(1400);
@@ -39,6 +41,22 @@ test('ships: acciones animadas y apodos con filtro', async ({ page }) => {
   await page.waitForTimeout(1400);
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: 'docs/screenshots/38-ships-ot7.png' });
+  // Nicole siempre viene con Andrés
+  await picker.getByRole('button', { name: 'Nicole', exact: true }).click();
+  await expect(page.getByText('Error (Andrés es tu novio)').first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /OT7 \+ Nicodrés/ })).toBeVisible();
+  for (const name of ['RM', 'Jin', 'SUGA', 'j-hope', 'Hadita tucumana', 'V', 'Jung Kook']) {
+    await picker.getByRole('button', { name, exact: true }).click();
+  }
+  await expect(page.getByRole('heading', { name: /Nicodrés/ })).toBeVisible();
+  await page.waitForTimeout(3000);
+  await page.getByTestId('ship-stage').screenshot({ path: 'docs/screenshots/42-ships-andres-nicole.png' });
+  const b2 = (await page.getByTestId('ship-stage').boundingBox())!;
+  await page.screenshot({ path: 'docs/screenshots/43-ships-andres-nicole-caras.png', clip: { x: b2.x + b2.width * 0.25, y: b2.y + 20, width: b2.width * 0.5, height: 80 } });
+  await page.getByRole('button', { name: /Beso$/ }).click();
+  await page.waitForTimeout(1800);
+  await page.getByTestId('ship-stage').evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 90));
+  await page.getByTestId('ship-stage').screenshot({ path: 'docs/screenshots/44-ships-andres-nicole-beso.png' });
   await page.getByRole('button', { name: 'Editar' }).click();
   const jk = page.getByPlaceholder('Jung Kook');
   await jk.fill('mi amor');
@@ -47,5 +65,5 @@ test('ships: acciones animadas y apodos con filtro', async ({ page }) => {
   await page.screenshot({ path: 'docs/screenshots/37-ships-apodo-bloqueado.png' });
   await jk.fill('Kookie');
   await page.getByRole('button', { name: 'Guardar apodos' }).click();
-  await expect(page.getByText('Kookie').first()).toBeVisible();
+  await expect(page.getByText(/Apodos guardados/)).toBeVisible();
 });

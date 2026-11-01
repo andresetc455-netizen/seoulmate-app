@@ -27,11 +27,13 @@ const TIPS: Record<ShipMember['style'], Array<[number, number]>> = {
   curly: [[30, 36], [35, 29], [41, 26], [47, 30], [53, 30], [59, 26], [65, 29], [70, 36]],
   fluffy: [[34, 31], [38, 38], [42, 28], [46, 38], [50, 27], [54, 38], [58, 28], [62, 38], [66, 31]],
   wavy: [[32, 47], [37, 41], [41, 36], [45, 33], [49, 34], [53, 29], [57, 35], [62, 33], [65, 42], [69, 48]],
+  long: [[31, 46], [37, 36], [43, 40], [46, 32], [49, 38], [51, 38], [54, 32], [57, 40], [63, 36], [69, 46]],
   mullet: [[30, 48], [36, 41], [40, 33], [45, 40], [50, 31], [55, 40], [60, 33], [64, 41], [70, 48]],
 };
 
 function BackHair({ m, fill }: { m: ShipMember; fill: string }) {
-  if (m.style === 'mullet') return <path d="M29 40 Q28 57 31.5 63 Q36 61 40 64 L60 64 Q64 61 68.5 63 Q72 57 71 40Z" fill={fill} />;
+  if (m.style === 'mullet') return <path d="M29 40 Q28.5 52 31 56 L69 56 Q71.5 52 71 40Z" fill={fill} />;
+  if (m.style === 'long') return <path d="M29 42 Q28 56 31 62 L69 62 Q72 56 71 42Z" fill={fill} />;
   if (m.style === 'wavy') return <path d="M29 42 Q26 62 32 70 Q36 66 40 69 L60 69 Q64 66 68 70 Q74 62 71 42Z" fill={fill} />;
   return <path d="M29 44 Q29 56 33 61 L67 61 Q71 56 71 44Z" fill={fill} />;
 }
@@ -54,29 +56,30 @@ function Fringe({ m, fill }: { m: ShipMember; fill: string }) {
       );
     case 'fluffy':
       return <path d="M29 45 L34 30 L38 39 L42 27 L46 39 L50 25 L54 39 L58 27 L62 39 L66 30 L71 45 Q72 18 50 17 Q28 18 29 45Z" fill={fill} />;
+    case 'long':
+      return <path d="M29 47 Q28 19 50 18 Q72 19 71 47 Q68 34 60 31 L57 41 L54 31 L51 39 L50 33 L49 39 L46 31 L43 41 L40 31 Q32 34 29 47Z" fill={fill} />;
     case 'wavy':
       return <path d="M28 51 Q27 21 50 19 Q73 21 72 51 Q69 40 65 43 Q63 32 57 36 Q53 27 49 35 Q43 30 40 41 Q35 38 33 47Z" fill={fill} />;
     default:
-      return <path d="M28 49 Q27 19 50 18 Q73 19 72 49 Q68 38 64 42 L60 32 L55 41 L50 30 L45 41 L40 32 L36 42 Q32 38 28 49Z" fill={fill} />;
+      return <path d="M29 44 Q27 19 50 18 Q73 19 71 44 Q68 37 64 40 L60 32 L55 41 L50 30 L45 41 L40 32 L36 40 Q32 37 29 44Z" fill={fill} />;
   }
 }
 
-function Eyes({ mood, id, iris }: { mood: Mood; id: string; iris: string }) {
+function Eyes({ mood, id, iris, fem }: { mood: Mood; id: string; iris: string; fem?: boolean }) {
   if (mood === 'happy' || mood === 'kiss') {
     const closed = mood === 'kiss';
     return (
       <g stroke="#2a1b16" fill="none" strokeLinecap="round">
         <path d={closed ? 'M37.5 45.5 Q42 48.3 46.8 45.3' : 'M37.5 46.4 Q42 42.2 46.8 45.6'} strokeWidth="1.3" />
         <path d={closed ? 'M62.5 45.5 Q58 48.3 53.2 45.3' : 'M62.5 46.4 Q58 42.2 53.2 45.6'} strokeWidth="1.3" />
-        {closed && <path d="M38 46.4 l-0.9 1.1 M40.3 47.3 l-0.5 1.2 M62 46.4 l0.9 1.1 M59.7 47.3 l0.5 1.2" strokeWidth="0.5" />}
-        <path d="M38.5 42.2 Q42 40.4 46 42.2 M61.5 42.2 Q58 40.4 54 42.2" strokeWidth="0.45" strokeOpacity="0.45" />
+                <path d="M38.5 42.2 Q42 40.4 46 42.2 M61.5 42.2 Q58 40.4 54 42.2" strokeWidth="0.45" strokeOpacity="0.45" />
       </g>
     );
   }
   const eye = (side: 1 | -1) => {
     const cx = side === 1 ? 42.2 : 57.8;
     const shape =
-      side === 1 ? 'M37 45.6 Q40.6 41.3 47.2 44.4 Q43.2 48.6 37 45.6Z' : 'M63 45.6 Q59.4 41.3 52.8 44.4 Q56.8 48.6 63 45.6Z';
+      side === 1 ? 'M37.2 45.2 Q41 42.4 47.2 44.2 Q43 47.2 37.2 45.2Z' : 'M62.8 45.2 Q59 42.4 52.8 44.2 Q57 47.2 62.8 45.2Z';
     const clip = `${id}-eye${side}`;
     return (
       <g>
@@ -90,24 +93,24 @@ function Eyes({ mood, id, iris }: { mood: Mood; id: string; iris: string }) {
             <path d={`M${cx} 47.6 l-2.6 -2.7 q-1.1 -1.5 0.4 -2.4 q1.3 -0.7 2.2 0.7 q0.9 -1.4 2.2 -0.7 q1.5 0.9 0.4 2.4z`} fill="#e0476f" />
           ) : (
             <>
-              <circle cx={cx} cy={45} r={2.75} fill={`url(#${id}-iris)`} />
-              <circle cx={cx} cy={45} r={2.75} fill="none" stroke="#1d120e" strokeWidth="0.35" />
-              <circle cx={cx} cy={45.1} r={1.15} fill="#120a08" />
+              <circle cx={cx} cy={44.8} r={2.35} fill={`url(#${id}-iris)`} />
+              <circle cx={cx} cy={44.8} r={2.35} fill="none" stroke="#1d120e" strokeWidth="0.3" />
+              <circle cx={cx} cy={44.9} r={1} fill="#120a08" />
             </>
           )}
-          <circle cx={cx + 0.9} cy={44} r={0.85} fill="#fff" />
+          <circle cx={cx + 0.8} cy={44} r={0.6} fill="#fff" />
           <circle cx={cx - 0.9} cy={46.1} r={0.38} fill="#fff" opacity="0.85" />
         </g>
         {/* párpado y pestañas */}
         <path
-          d={side === 1 ? 'M36.4 45.9 Q40.4 40.8 47.4 44.3' : 'M63.6 45.9 Q59.6 40.8 52.6 44.3'}
+          d={side === 1 ? 'M36.8 45.4 Q40.8 41.9 47.4 44.1' : 'M63.2 45.4 Q59.2 41.9 52.6 44.1'}
           stroke="#1e1310"
-          strokeWidth="1.25"
+          strokeWidth="1"
           fill="none"
           strokeLinecap="round"
         />
-        <path d={side === 1 ? 'M36.6 45.8 l-1.5 -0.3 M37.3 44.6 l-1.3 -0.8' : 'M63.4 45.8 l1.5 -0.3 M62.7 44.6 l1.3 -0.8'} stroke="#1e1310" strokeWidth="0.55" strokeLinecap="round" />
-        <path d={side === 1 ? 'M38.3 42.4 Q42 40.2 46.4 42.3' : 'M61.7 42.4 Q58 40.2 53.6 42.3'} stroke="#7a5446" strokeWidth="0.45" fill="none" strokeOpacity="0.6" />
+                {fem && <path d={side === 1 ? 'M36.8 45.3 l-1.6 -0.4 M37.5 44.2 l-1.4 -0.9 M38.6 43.3 l-1 -1.1' : 'M63.2 45.3 l1.6 -0.4 M62.5 44.2 l1.4 -0.9 M61.4 43.3 l1 -1.1'} stroke="#1e1310" strokeWidth="0.55" strokeLinecap="round" />}
+        <path d={side === 1 ? 'M38.6 42.3 Q42 40.8 46.4 42.4' : 'M61.4 42.3 Q58 40.8 53.6 42.4'} stroke="#7a5446" strokeWidth="0.45" fill="none" strokeOpacity="0.6" />
         <path d={side === 1 ? 'M38.2 47 Q42 48.8 46.2 46.4' : 'M61.8 47 Q58 48.8 53.8 46.4'} stroke="#7a5446" strokeWidth="0.35" fill="none" strokeOpacity="0.45" />
       </g>
     );
@@ -130,24 +133,32 @@ function Mouth({ mood, id }: { mood: Mood; id: string }) {
     return (
       <g>
         <ellipse cx="50.4" cy="61.4" rx="2.3" ry="1.9" fill={`url(#${id}-lip)`} />
-        <path d="M48.6 61.3 Q50.4 60.6 52.2 61.3" stroke="#a9505f" strokeWidth="0.5" fill="none" />
+        <path d="M48.6 61.3 Q50.4 60.6 52.2 61.3" stroke="#8a5550" strokeWidth="0.5" fill="none" />
         <ellipse cx="51" cy="62.2" rx="0.7" ry="0.35" fill="#fff" opacity="0.5" />
       </g>
     );
   if (mood === 'blush')
     return (
       <g>
-        <path d="M46.2 61 Q48 60.3 50 60.8 Q52 60.3 53.8 61 Q50 62.2 46.2 61Z" fill="#d88c8f" />
+        <path d="M46.2 61 Q48 60.5 50 60.8 Q52 60.5 53.8 61 Q50 62 46.2 61Z" fill="#c4958a" />
         <path d="M47 61.5 Q50 64.2 53 61.5 Q50 62.6 47 61.5Z" fill={`url(#${id}-lip)`} />
-        <path d="M46.2 61 Q50 62 53.8 61" stroke="#9c4a56" strokeWidth="0.6" fill="none" strokeLinecap="round" />
+        <path d="M46.2 61 Q50 62 53.8 61" stroke="#8a5550" strokeWidth="0.6" fill="none" strokeLinecap="round" />
+      </g>
+    );
+  if (mood === 'smile')
+    return (
+      <g>
+        <path d="M45.4 60.4 Q50 63.6 54.6 60.4" stroke="#7a4a44" strokeWidth="0.85" fill="none" strokeLinecap="round" />
+        <path d="M47.4 62.9 Q50 64.2 52.6 62.9" stroke="#c4958a" strokeWidth="0.9" fill="none" strokeLinecap="round" opacity="0.8" />
+        <path d="M44.8 60.1 Q45.3 59.7 45.8 60.4 M55.2 60.1 Q54.7 59.7 54.2 60.4" stroke="#8a5550" strokeWidth="0.5" fill="none" strokeLinecap="round" />
       </g>
     );
   return (
     <g>
-      <path d="M45.3 60.2 Q50 61.4 54.7 60.2 Q52.6 65.6 50 65.6 Q47.4 65.6 45.3 60.2Z" fill="#8f3446" />
+      <path d="M45.3 60.2 Q50 61.4 54.7 60.2 Q52.6 65.6 50 65.6 Q47.4 65.6 45.3 60.2Z" fill="#6e3434" />
       <path d="M46.2 60.6 Q50 61.6 53.8 60.6 L53.4 61.6 Q50 62.4 46.6 61.6Z" fill="#fbf7f4" />
-      <path d="M47.6 64.2 Q50 65.6 52.4 64.2 Q50 65.9 47.6 64.2Z" fill="#e08a95" />
-      <path d="M44.6 60.1 Q45.2 59.6 45.8 60.3 M55.4 60.1 Q54.8 59.6 54.2 60.3" stroke="#a65a62" strokeWidth="0.5" fill="none" strokeLinecap="round" />
+      <path d="M47.6 64.2 Q50 65.6 52.4 64.2 Q50 65.9 47.6 64.2Z" fill="#b97a72" />
+      <path d="M44.6 60.1 Q45.2 59.6 45.8 60.3 M55.4 60.1 Q54.8 59.6 54.2 60.3" stroke="#8a5550" strokeWidth="0.5" fill="none" strokeLinecap="round" />
     </g>
   );
 }
@@ -201,8 +212,8 @@ export function ShipCharacter({ m, mood = 'smile', size = 110, bust = false }: {
           <stop offset="1" stopColor="#c9d0db" />
         </linearGradient>
         <linearGradient id={`${id}-lip`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#e7929b" />
-          <stop offset="1" stopColor="#c9636f" />
+          <stop offset="0" stopColor="#d49a90" />
+          <stop offset="1" stopColor="#b8786e" />
         </linearGradient>
         <clipPath id={`${id}-shirt`}>
           <path d="M21 86 Q23 73 42 71 L58 71 Q77 73 79 86 L82 102 L72.5 105 Q70 121 71.5 140 Q50 144 28.5 140 Q30 121 27.5 105 L18 102Z" />
@@ -236,6 +247,13 @@ export function ShipCharacter({ m, mood = 'smile', size = 110, bust = false }: {
           {/* brazos */}
           <path d="M19.5 99 Q15 112 16.5 124 Q17.2 136 19.8 146 L26.6 146 Q25.6 134 26.4 124 Q28 112 30.5 102Z" fill={u('limb')} />
           <path d="M80.5 99 Q85 112 83.5 124 Q82.8 136 80.2 146 L73.4 146 Q74.4 134 73.6 124 Q72 112 69.5 102Z" fill={u('limb')} />
+          {m.tattoo && (
+            <g stroke="#3a3a44" strokeWidth="0.5" fill="none" opacity="0.65" strokeLinecap="round">
+              <path d="M20 128 Q22 131 21 135 Q23 138 21.5 142" />
+              <path d="M22.5 127 Q25 130 23.5 134 M24.5 136 Q22.5 139 24.8 142 M19.5 133 l2 1 M20 138 l2.4 0.6" />
+              <circle cx="23.4" cy="131.5" r="1.1" />
+            </g>
+          )}
           <path d="M18.6 124 Q21.5 125.8 25.6 124 M81.4 124 Q78.5 125.8 74.4 124" stroke={SKIN_SH} strokeWidth="0.6" fill="none" />
           <path d="M19.4 144.5 Q17.6 152 20.6 156.4 Q24.4 158.6 27 154.4 Q28.4 149 27.2 144.5Z" fill={u('limb')} />
           <path d="M80.6 144.5 Q82.4 152 79.4 156.4 Q75.6 158.6 73 154.4 Q71.6 149 72.8 144.5Z" fill={u('limb')} />
@@ -248,9 +266,16 @@ export function ShipCharacter({ m, mood = 'smile', size = 110, bust = false }: {
         <BackHair m={m} fill={shade(m.hair, -0.3)} />
       </g>
 
+      {m.style === 'long' && (
+        <g>
+          <path d="M31 30 Q23 60 25 92 Q26 112 31 120 L42 114 L44 70 L56 70 L58 114 L69 120 Q74 112 75 92 Q77 60 69 30Z" fill={shade(m.hair, -0.25)} />
+          {m.highlights && <path d="M28 70 Q27 95 31 116 M72 70 Q73 95 69 116" stroke={m.highlights} strokeWidth="1.4" fill="none" opacity="0.7" />}
+        </g>
+      )}
       {/* cuello */}
-      <path d="M44.6 56 L55.4 56 L56.4 74 Q50 78 43.6 74Z" fill={u('limb')} />
-      <path d="M44.8 61 Q50 66 55.2 61 L55.5 66 Q50 69 44.5 66Z" fill={SKIN_SH} opacity="0.7" />
+      <path d="M42.8 56 L57.2 56 L58.6 74 Q50 78.5 41.4 74Z" fill={u('limb')} />
+      <path d="M43 61 Q50 67 57 61 L57.4 66 Q50 70 42.6 66Z" fill={SKIN_SH} opacity="0.7" />
+      <path d="M49.4 68 Q50 69.4 50.6 68" stroke={SKIN_SH} strokeWidth="0.7" fill="none" />
 
       {/* camiseta albiceleste */}
       <g clipPath={u('shirt')}>
@@ -263,6 +288,20 @@ export function ShipCharacter({ m, mood = 'smile', size = 110, bust = false }: {
       <path d="M21 86 Q23 73 42 71 L58 71 Q77 73 79 86 L82 102 L72.5 105 Q70 121 71.5 140 Q50 144 28.5 140 Q30 121 27.5 105 L18 102Z" fill="none" stroke="#9fb5cc" strokeWidth="0.5" />
       <path d="M42 71 L50 82 L58 71 L55.2 71 L50 78.4 L44.8 71Z" fill={NAVY} />
       <path d="M44.8 71 L50 78.4 L55.2 71Z" fill={u('limb')} />
+      {m.chain && (
+        <g stroke="#c9ccd6" fill="none" strokeWidth="0.7">
+          <path d="M43.6 72 Q50 83 56.4 72" />
+          <path d="M42.6 72 Q50 87 57.4 72" strokeWidth="0.5" />
+          <path d="M50 84.6 L50 89 M48.4 86.2 L51.6 86.2" stroke="#e4e6ec" strokeWidth="0.9" />
+        </g>
+      )}
+      {m.style === 'long' && (
+        <g fill={u('hair')}>
+          <path d="M33 52 Q29 82 32 114 L39 110 Q36 84 39 62Z" />
+          <path d="M67 52 Q71 82 68 114 L61 110 Q64 84 61 62Z" />
+          {m.highlights && <path d="M34 62 Q32 86 34 108 M66 62 Q68 86 66 108" stroke={m.highlights} strokeWidth="1" fill="none" opacity="0.8" />}
+        </g>
+      )}
       {!bust && (
         <text x="61" y="95" fontSize="7" fontWeight="800" fill={NAVY} textAnchor="middle" fontFamily="system-ui, sans-serif" opacity="0.9">
           {m.number}
@@ -280,25 +319,33 @@ export function ShipCharacter({ m, mood = 'smile', size = 110, bust = false }: {
             <circle cx="69" cy="53.4" r="1.2" fill="none" stroke="#d6d8df" strokeWidth="0.7" />
           </g>
         )}
-        <path d="M31 38 Q31 17 50 16 Q69 17 69 38 Q69 52 64 60 Q57 70 50 71 Q43 70 36 60 Q31 52 31 38Z" fill={u('skin')} />
+        <path d={m.fem ? 'M31 38 Q31 17 50 16 Q69 17 69 38 Q69 52 64 60 Q57 69.5 50 70.5 Q43 69.5 36 60 Q31 52 31 38Z' : 'M31 37 Q31 17 50 16 Q69 17 69 37 Q69.6 50 67.4 57.5 Q63.5 66.5 55.5 70.2 Q50 71.8 44.5 70.2 Q36.5 66.5 32.6 57.5 Q30.4 50 31 37Z'} fill={u('skin')} />
         {/* sombras de la cara */}
-        <path d="M31.5 44 Q33 58 42 66 Q37 64 34 58 Q31.5 52 31.5 44Z" fill={SKIN_SH} opacity="0.45" />
-        <path d="M68.5 44 Q67 58 58 66 Q63 64 66 58 Q68.5 52 68.5 44Z" fill={SKIN_SH} opacity="0.45" />
+        <path d="M31.5 44 Q32.5 58 44 69 Q37 66 33.6 58.5 Q31.2 52 31.5 44Z" fill={SKIN_SH} opacity="0.45" />
+        <path d="M68.5 44 Q67.5 58 56 69 Q63 66 66.4 58.5 Q68.8 52 68.5 44Z" fill={SKIN_SH} opacity="0.45" />
         <path d="M31 36 Q50 27 69 36 L69 41 Q50 32 31 41Z" fill={SKIN_SH} opacity="0.35" />
-        <ellipse cx="38.5" cy="53.5" rx="4.4" ry={blush ? 2.4 : 1.8} fill="#f08ea8" opacity={blush ? 0.6 : 0.28} />
-        <ellipse cx="61.5" cy="53.5" rx="4.4" ry={blush ? 2.4 : 1.8} fill="#f08ea8" opacity={blush ? 0.6 : 0.28} />
+        <ellipse cx="38.5" cy="53.5" rx="4.4" ry={blush ? 2.4 : 1.8} fill="#ec9c9c" opacity={blush ? 0.45 : m.fem ? 0.3 : 0.12} />
+        <ellipse cx="61.5" cy="53.5" rx="4.4" ry={blush ? 2.4 : 1.8} fill="#ec9c9c" opacity={blush ? 0.45 : m.fem ? 0.3 : 0.12} />
         {blush && <path d="M36 52.5 l1.2 -1.4 M38.5 52.6 l1.2 -1.4 M61 52.6 l1.2 -1.4 M63.5 52.5 l1.2 -1.4" stroke="#e0607f" strokeWidth="0.4" opacity="0.7" />}
 
         {/* cejas */}
-        <path d="M36.6 39.4 Q41 36.3 47.2 38 L47 39.2 Q41.5 37.9 37.1 40.3Z" fill={hairDark} />
-        <path d="M63.4 39.4 Q59 36.3 52.8 38 L53 39.2 Q58.5 37.9 62.9 40.3Z" fill={hairDark} />
-        <Eyes mood={mood} id={id} iris={m.iris} />
+        <path d={m.fem ? 'M36.8 39.6 Q41 36.8 47.2 37.9 L47.1 38.9 Q41.5 38 37.2 40.4Z' : 'M36 39.8 Q41 36.6 47.6 37.4 L47.5 39.8 Q41.5 38.9 36.6 41.3Z'} fill={hairDark} />
+        <path d={m.fem ? 'M63.2 39.6 Q59 36.8 52.8 37.9 L52.9 38.9 Q58.5 38 62.8 40.4Z' : 'M64 39.8 Q59 36.6 52.4 37.4 L52.5 39.8 Q58.5 38.9 63.4 41.3Z'} fill={hairDark} />
+        <Eyes mood={mood} id={id} iris={m.iris} fem={m.fem} />
 
         {/* nariz */}
-        <path d="M49.2 46.5 Q48.2 51.5 48.4 54.2" stroke={SKIN_SH} strokeWidth="0.8" fill="none" strokeLinecap="round" opacity="0.8" />
-        <path d="M47.6 55.2 Q48.6 56.4 50 56 Q51.4 56.4 52.4 55.2" stroke="#c98d76" strokeWidth="0.7" fill="none" strokeLinecap="round" />
+        <path d="M49 45 Q47.8 51.5 47.9 54.4" stroke={SKIN_SH} strokeWidth="0.8" fill="none" strokeLinecap="round" opacity="0.8" />
+        <path d="M47 55.3 Q48.4 56.8 50 56.3 Q51.6 56.8 53 55.3" stroke="#c98d76" strokeWidth="0.7" fill="none" strokeLinecap="round" />
         <ellipse cx="50.7" cy="52.2" rx="0.55" ry="1.7" fill="#fff" opacity="0.5" />
         <Mouth mood={mood} id={id} />
+        {m.fem && mood !== 'kiss' && <path d="M46.6 62.6 Q50 64.6 53.4 62.6 Q50 63.8 46.6 62.6Z" fill="#d9848f" opacity="0.8" />}
+        {m.labret && <circle cx="50" cy="66" r="0.75" fill="#e4e6ec" stroke="#9a9caa" strokeWidth="0.25" />}
+        {m.stubble && (
+          <g fill="#5a463e">
+            <path d="M40 62 Q42 69 50 71 Q58 69 60 62 Q57 67 50 67.6 Q43 67 40 62Z" opacity="0.16" />
+            <path d="M45.5 58.6 Q50 57.6 54.5 58.6 L54 59.4 Q50 58.6 46 59.4Z" opacity="0.22" />
+          </g>
+        )}
         <path d="M47 68.4 Q50 69.6 53 68.4" stroke={SKIN_SH} strokeWidth="0.6" fill="none" opacity="0.6" />
         {m.extra === 'dimples' && mood !== 'kiss' && (
           <path d="M43.6 61.5 q-0.6 1.2 0.2 2 M56.4 61.5 q0.6 1.2 -0.2 2" stroke="#c58f7b" strokeWidth="0.6" fill="none" strokeLinecap="round" />
@@ -319,6 +366,21 @@ export function ShipCharacter({ m, mood = 'smile', size = 110, bust = false }: {
             <path key={i} d={`M${50 + (x - 50) * 0.35} 15 Q${x + (x - 50) * 0.15} ${(y + 15) / 2} ${x + 1} ${y - 4}`} />
           ))}
         </g>
+        {m.highlights && (
+          <g stroke={m.highlights} strokeWidth="1.1" fill="none" strokeLinecap="round" opacity="0.85">
+            <path d="M40 21 Q41 30 43 40" />
+            <path d="M58 21 Q57 30 57 40" />
+            <path d="M47 19 Q47 26 46 32" />
+          </g>
+        )}
+        {m.glasses && (
+          <g stroke="#3f5270" strokeWidth="0.9" fill="#dbe7ff" fillOpacity="0.12">
+            <rect x="35.2" y="40.6" width="13" height="8.6" rx="2" />
+            <rect x="51.8" y="40.6" width="13" height="8.6" rx="2" />
+            <path d="M48.2 43.4 Q50 42.4 51.8 43.4 M35.2 43 L31.5 42 M64.8 43 L68.5 42" fill="none" />
+            <path d="M37 42 L39.5 41.6 M53.6 42 L56.1 41.6" stroke="#fff" strokeOpacity="0.6" strokeWidth="0.5" />
+          </g>
+        )}
         <path d="M35 24 Q50 15.5 65 24" stroke={shade(m.hair, 0.6)} strokeWidth="2.2" strokeDasharray="3.2 1.6" fill="none" strokeLinecap="round" opacity="0.6" />
       </g>
     </svg>

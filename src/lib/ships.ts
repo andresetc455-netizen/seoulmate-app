@@ -7,19 +7,32 @@ export interface ShipMember {
   hair: string;
   iris: string;
   number: number; // dorsal: el día de su cumpleaños
-  style: 'sweep' | 'soft' | 'curtain' | 'curly' | 'fluffy' | 'wavy' | 'mullet';
+  style: 'sweep' | 'soft' | 'curtain' | 'curly' | 'fluffy' | 'wavy' | 'mullet' | 'long';
   extra?: 'dimples' | 'mole' | 'earring';
+  bts?: boolean;
+  fem?: boolean;
+  glasses?: boolean;
+  stubble?: boolean;
+  chain?: boolean;
+  tattoo?: boolean;
+  labret?: boolean;
+  highlights?: string;
 }
 
 export const SHIP_MEMBERS: ShipMember[] = [
-  { id: 'rm', iris: '#5a3d2b', name: 'RM', emoji: '🐨', hair: '#3b2f2f', number: 12, style: 'sweep', extra: 'dimples' },
-  { id: 'jin', iris: '#4a2f22', name: 'Jin', emoji: '🐹', hair: '#5b3a2e', number: 4, style: 'soft' },
-  { id: 'suga', iris: '#3b2a20', name: 'SUGA', emoji: '🐱', hair: '#8fd3c1', number: 9, style: 'curtain' },
-  { id: 'jhope', iris: '#6a4630', name: 'j-hope', emoji: '🐿️', hair: '#7a4630', number: 18, style: 'curly' },
-  { id: 'jimin', iris: '#5c3a28', name: 'Jimin', emoji: '🐥', hair: '#e8cf8f', number: 13, style: 'fluffy' },
-  { id: 'v', iris: '#3d2a20', name: 'V', emoji: '🐯', hair: '#2c3150', number: 30, style: 'wavy', extra: 'mole' },
-  { id: 'jk', iris: '#2e1f17', name: 'Jung Kook', emoji: '🐰', hair: '#1b1820', number: 1, style: 'mullet', extra: 'earring' },
+  { id: 'rm', bts: true, iris: '#5a3d2b', name: 'RM', emoji: '🐨', hair: '#3b2f2f', number: 12, style: 'sweep', extra: 'dimples' },
+  { id: 'jin', bts: true, iris: '#4a2f22', name: 'Jin', emoji: '🐹', hair: '#5b3a2e', number: 4, style: 'soft' },
+  { id: 'suga', bts: true, iris: '#3b2a20', name: 'SUGA', emoji: '🐱', hair: '#8fd3c1', number: 9, style: 'curtain' },
+  { id: 'jhope', bts: true, iris: '#6a4630', name: 'j-hope', emoji: '🐿️', hair: '#7a4630', number: 18, style: 'curly' },
+  { id: 'jimin', bts: true, iris: '#5c3a28', name: 'Jimin', emoji: '🐥', hair: '#e8cf8f', number: 13, style: 'fluffy' },
+  { id: 'v', bts: true, iris: '#3d2a20', name: 'V', emoji: '🐯', hair: '#2c3150', number: 30, style: 'wavy', extra: 'mole' },
+  { id: 'jk', bts: true, iris: '#2e1f17', name: 'Jung Kook', emoji: '🐰', hair: '#1b1820', number: 1, style: 'mullet', extra: 'earring' },
+  // Ellos dos, dibujados a partir de sus fotos.
+  { id: 'andres', name: 'Andrés', emoji: '🤓', iris: '#3b2618', hair: '#241a16', number: 10, style: 'curly', glasses: true, stubble: true, chain: true, tattoo: true },
+  { id: 'nicole', name: 'Nicole', emoji: '💜', iris: '#4a2c1c', hair: '#33201a', number: 11, style: 'long', fem: true, labret: true, highlights: '#c99460' },
 ];
+
+export const BTS_IDS = SHIP_MEMBERS.filter((m) => m.bts).map((m) => m.id);
 
 export const DEFAULT_NICKNAMES: Record<string, string> = { jimin: 'Hadita tucumana' };
 
@@ -87,6 +100,7 @@ const KNOWN: Record<string, string> = {
   'jhope+jin': 'Jinhope',
   'jk+rm': 'Namkook',
   'suga+v': 'Taegi',
+  'andres+nicole': 'Nicodrés',
 };
 
 export function pairKey(a: string, b: string): string {
@@ -109,7 +123,9 @@ export function groupKey(ids: string[]): string {
 
 export function shipName(...ids: string[]): string {
   if (ids.length === 2) return KNOWN[pairKey(ids[0], ids[1])] ?? `${memberById(ids[0])?.name ?? ids[0]} × ${memberById(ids[1])?.name ?? ids[1]}`;
-  if (ids.length === SHIP_MEMBERS.length) return 'OT7';
+  const allBts = BTS_IDS.every((b) => ids.includes(b));
+  if (allBts && ids.length === BTS_IDS.length) return 'OT7';
+  if (allBts) return ids.includes('nicole') ? 'OT7 + Nicodrés' : 'OT8';
   return GROUPS[groupKey(ids)] ?? `OT${ids.length}`;
 }
 

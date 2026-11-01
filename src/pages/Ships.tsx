@@ -3,7 +3,7 @@ import { useDoc } from '../lib/store';
 import { btsDoc } from '../lib/docs';
 import { toast } from '../components/ui';
 import {
-  SHIP_ACTIONS, SHIP_MEMBERS, FORBIDDEN_NICKNAME_MSG, NICKNAME_MAX, actionLine, compatibility, displayName,
+  BTS_IDS, SHIP_ACTIONS, SHIP_MEMBERS, FORBIDDEN_NICKNAME_MSG, NICKNAME_MAX, actionLine, compatibility, displayName,
   isForbiddenNickname, joinNames, memberById, nicknamesOf, shipName, type ShipAction,
 } from '../lib/ships';
 import { ShipCharacter } from './ShipCharacter';
@@ -51,6 +51,17 @@ export function ShipsTab() {
   );
 
   const toggle = (id: string) => {
+    // Nicole solo va en un ship si está Andrés.
+    if (id === 'andres' && sel.includes('andres') && sel.includes('nicole')) {
+      toast(FORBIDDEN_NICKNAME_MSG, 'error');
+      return;
+    }
+    if (id === 'nicole' && !sel.includes('nicole') && !sel.includes('andres')) {
+      toast(FORBIDDEN_NICKNAME_MSG, 'error');
+      setSel(ORDER.filter((x) => x === 'nicole' || x === 'andres' || sel.includes(x)));
+      setAction(null);
+      return;
+    }
     if (sel.includes(id)) {
       if (n <= 2) {
         toast('Un ship necesita al menos dos 💜');
@@ -69,6 +80,7 @@ export function ShipsTab() {
   const surprise = () => {
     const k = Math.random() < 0.15 ? 7 : 2 + Math.floor(Math.random() * 3);
     const shuffled = [...ORDER].sort(() => Math.random() - 0.5).slice(0, k);
+    if (shuffled.includes('nicole') && !shuffled.includes('andres')) shuffled.push('andres');
     setSel(ORDER.filter((x) => shuffled.includes(x)));
     doAction(SHIP_ACTIONS[Math.floor(Math.random() * SHIP_ACTIONS.length)]);
   };
@@ -84,7 +96,7 @@ export function ShipsTab() {
 
       <div className="ship-pickrow">
         <span className="small muted">Tocá a 2 o más ({n} elegidos)</span>
-        <button type="button" className="btn sm secondary" onClick={() => { setSel([...ORDER]); setAction(null); }} disabled={n === 7}>
+        <button type="button" className="btn sm secondary" onClick={() => { setSel([...BTS_IDS]); setAction(null); }} disabled={sel.join() === BTS_IDS.join()}>
           Todos (OT7)
         </button>
       </div>
@@ -178,7 +190,7 @@ function NicknameEditor({ saved }: { saved: Record<string, string> | undefined }
     const clean: Record<string, string> = {};
     for (const m of SHIP_MEMBERS) {
       const v = (draft[m.id] ?? '').trim().slice(0, NICKNAME_MAX);
-      if (isForbiddenNickname(v)) {
+      if (m.id !== 'andres' && isForbiddenNickname(v)) {
         setBad(m.id);
         toast(FORBIDDEN_NICKNAME_MSG, 'error');
         return;
