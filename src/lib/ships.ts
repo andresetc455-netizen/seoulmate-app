@@ -1,38 +1,31 @@
-// Ships de BTS: personajes ilustrados (sin fotos), acciones tiernas y apodos editables.
+// Ships de BTS: avatares chibi dibujados (sin fotos), acciones tiernas y apodos editables.
 
 export interface ShipMember {
   id: string;
   name: string;
   emoji: string;
   hair: string;
-  iris: string;
-  number: number; // dorsal: el día de su cumpleaños
-  style: 'sweep' | 'soft' | 'curtain' | 'curly' | 'fluffy' | 'wavy' | 'mullet' | 'long';
-  extra?: 'dimples' | 'mole' | 'earring';
+  outfit: string;
+  style: 'side' | 'curtain' | 'spiky' | 'fluffy' | 'bowl' | 'curly' | 'long';
   bts?: boolean;
-  fem?: boolean;
   glasses?: boolean;
-  stubble?: boolean;
-  chain?: boolean;
-  tattoo?: boolean;
   labret?: boolean;
-  highlights?: string;
 }
 
 export const SHIP_MEMBERS: ShipMember[] = [
-  { id: 'rm', bts: true, iris: '#5a3d2b', name: 'RM', emoji: '🐨', hair: '#3b2f2f', number: 12, style: 'sweep', extra: 'dimples' },
-  { id: 'jin', bts: true, iris: '#4a2f22', name: 'Jin', emoji: '🐹', hair: '#5b3a2e', number: 4, style: 'soft' },
-  { id: 'suga', bts: true, iris: '#3b2a20', name: 'SUGA', emoji: '🐱', hair: '#8fd3c1', number: 9, style: 'curtain' },
-  { id: 'jhope', bts: true, iris: '#6a4630', name: 'j-hope', emoji: '🐿️', hair: '#7a4630', number: 18, style: 'curly' },
-  { id: 'jimin', bts: true, iris: '#5c3a28', name: 'Jimin', emoji: '🐥', hair: '#e8cf8f', number: 13, style: 'fluffy' },
-  { id: 'v', bts: true, iris: '#3d2a20', name: 'V', emoji: '🐯', hair: '#2c3150', number: 30, style: 'wavy', extra: 'mole' },
-  { id: 'jk', bts: true, iris: '#2e1f17', name: 'Jung Kook', emoji: '🐰', hair: '#1b1820', number: 1, style: 'mullet', extra: 'earring' },
+  { id: 'rm', name: 'RM', emoji: '🐨', hair: '#6b5a8e', outfit: '#8e7cc3', style: 'side' },
+  { id: 'jin', name: 'Jin', emoji: '🐹', hair: '#d98aa8', outfit: '#f3a6c0', style: 'curtain' },
+  { id: 'suga', name: 'SUGA', emoji: '🐱', hair: '#9ed9c6', outfit: '#5b5470', style: 'bowl' },
+  { id: 'jhope', name: 'j-hope', emoji: '🐿️', hair: '#e89a5b', outfit: '#f6cd5c', style: 'spiky' },
+  { id: 'jimin', name: 'Jimin', emoji: '🐥', hair: '#f1d27a', outfit: '#f6b2c8', style: 'fluffy' },
+  { id: 'v', name: 'V', emoji: '🐯', hair: '#5a6fa8', outfit: '#7aa0d8', style: 'curtain' },
+  { id: 'jk', name: 'Jung Kook', emoji: '🐰', hair: '#2f2a3a', outfit: '#3d3350', style: 'fluffy' },
   // Ellos dos, dibujados a partir de sus fotos.
-  { id: 'andres', name: 'Andrés', emoji: '🤓', iris: '#3b2618', hair: '#241a16', number: 10, style: 'curly', glasses: true, stubble: true, chain: true, tattoo: true },
-  { id: 'nicole', name: 'Nicole', emoji: '💜', iris: '#4a2c1c', hair: '#33201a', number: 11, style: 'long', fem: true, labret: true, highlights: '#c99460' },
+  { id: 'andres', name: 'Andrés', emoji: '🤓', hair: '#241a16', outfit: '#d9343c', style: 'curly', glasses: true },
+  { id: 'nicole', name: 'Nicole', emoji: '💐', hair: '#16100e', outfit: '#2a2530', style: 'long', labret: true },
 ];
 
-export const BTS_IDS = SHIP_MEMBERS.filter((m) => m.bts).map((m) => m.id);
+export const BTS_IDS = ['rm', 'jin', 'suga', 'jhope', 'jimin', 'v', 'jk'];
 
 export const DEFAULT_NICKNAMES: Record<string, string> = { jimin: 'Hadita tucumana' };
 
@@ -144,7 +137,7 @@ export function compatibility(...ids: string[]): number {
 
 export type Fx = 'hearts' | 'notes' | 'rain' | 'petals' | 'stars' | 'sparkles';
 export type Move = 'none' | 'close' | 'touch';
-export type Mood = 'love' | 'kiss' | 'blush' | 'happy' | 'smile';
+export type Mood = 'love' | 'kiss' | 'blush' | 'happy';
 
 export interface ShipAction {
   id: string;
