@@ -44,11 +44,11 @@ Es lo que permite que la app le pida a Microsoft permiso de lectura a nombre de 
    - Nombre: `Seoulmate`.
    - Tipos de cuenta: **"Cuentas en cualquier directorio organizativo y cuentas personales de Microsoft"**.
    - URI de redirección: plataforma **"Aplicación de página única (SPA)"** y la dirección
-     `https://amartinez234.github.io/seoulmate/`
+     `https://genuine-melba-73ecce.netlify.app/`
 3. **Registrar**. En la página que aparece, copiá el **"Id. de aplicación (cliente)"** (formato `1234abcd-…`).
    No es una contraseña: se puede pegar tranquilo.
 4. **Permisos de API → Agregar un permiso → Microsoft Graph → Permisos delegados** → marcá **Files.Read.All** → Agregar.
-5. (Opcional) En **Autenticación**, agregá también `https://amartinez234.github.io/seoulmate/index.html` como URI de redirección.
+5. (Opcional) En **Autenticación**, agregá también `https://genuine-melba-73ecce.netlify.app/index.html` como URI de redirección.
 
 ## Parte 3 · Conectar Seoulmate
 
@@ -65,7 +65,7 @@ Cuando subas capítulos nuevos, aparecen al tocar **↻ Actualizar**.
 | --- | --- |
 | "Esta cuenta no tiene acceso a la carpeta" | La carpeta no está compartida con el correo con el que entró ella. Revisá la Parte 1, paso 3. |
 | La ventana de Microsoft no abre (iPhone, app instalada) | La app usa redirección: después de entrar vuelve sola a Seoulmate. Si pide la contraseña de Seoulmate, ingresala y abrí de nuevo "En la nube". |
-| Error de "redirect URI" al entrar | La URI de la Parte 2 tiene que ser exactamente `https://amartinez234.github.io/seoulmate/` y de tipo SPA. |
+| Error de "redirect URI" al entrar | La URI de la Parte 2 tiene que ser exactamente `https://genuine-melba-73ecce.netlify.app/` y de tipo SPA. |
 | "Este teléfono no puede reproducir este formato" | Convertí el video a MP4 (H.264), por ejemplo con HandBrake (gratis). |
 | No aparecen los subtítulos | El `.srt` tiene que tener el mismo nombre que el video (se acepta `.es.srt`). |
 | Se corta o tarda | Depende de la conexión: con datos móviles conviene Wi-Fi o videos de 720p. |
