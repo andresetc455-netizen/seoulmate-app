@@ -34,6 +34,23 @@ export function WatchSummary({ drama }: { drama: Drama }) {
   );
 }
 
+function LocalOverlay({ drama, files, subs, index, onIndex }: { drama: Drama; files: File[]; subs: File[]; index: number; onIndex: (i: number | null) => void }) {
+  const file = files[index];
+  const sub = subs.find((s) => sameBase(s.name, file.name)) ?? (files.length === 1 && subs.length === 1 ? subs[0] : undefined);
+  const source = useMemo(() => localSource(file, sub), [file, sub]);
+  return (
+    <VideoOverlay
+      key={source.key}
+      dramaId={drama.id}
+      dramaTitle={drama.title}
+      source={source}
+      hasNext={index < files.length - 1}
+      onNext={() => onIndex(index + 1)}
+      onClose={() => onIndex(null)}
+    />
+  );
+}
+
 export function LocalEpisodes({ drama }: { drama: Drama }) {
   const input = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -96,40 +113,61 @@ export function LocalEpisodes({ drama }: { drama: Drama }) {
         </div>
       )}
       {playing !== null && files[playing] && (
-        <VideoOverlay
-          key={fileKey(files[playing])}
-          drama={drama}
-          file={files[playing]}
-          sub={subs.find((s) => sameBase(s.name, files[playing].name)) ?? (files.length === 1 && subs.length === 1 ? subs[0] : undefined)}
-          hasNext={playing < files.length - 1}
-          onNext={() => setPlaying(playing + 1)}
-          onClose={() => setPlaying(null)}
-        />
+        <LocalOverlay drama={drama} files={files} subs={subs} index={playing} onIndex={setPlaying} />
       )}
     </div>
   );
 }
 
-function VideoOverlay({ drama, file, sub, hasNext, onNext, onClose }: { drama: Drama; file: File; sub?: File; hasNext: boolean; onNext: () => void; onClose: () => void }) {
+/** Lo que el reproductor necesita de un capítulo, venga del teléfono o de la nube. */
+export interface PlaySource {
+  key: string;
+  name: string;
+  ep: number | null;
+  url: () => Promise<string>;
+  subtitles?: () => Promise<string | null>; // texto .srt o .vtt
+}
+
+export function localSource(file: File, sub?: File): PlaySource {
+  return {
+    key: fileKey(file),
+    name: file.name,
+    ep: parseEpisode(file.name),
+    url: async () => URL.createObjectURL(file),
+    subtitles: sub ? () => sub.text() : undefined,
+  };
+}
+
+export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onClose }: { dramaId: string; dramaTitle: string; source: PlaySource; hasNext: boolean; onNext: () => void; onClose: () => void }) {
   const video = useRef<HTMLVideoElement>(null);
-  const url = useMemo(() => URL.createObjectURL(file), [file]);
+  const [url, setUrl] = useState<string | null>(null);
   const [vtt, setVtt] = useState<string | null>(null);
   const [error, setError] = useState('');
   const lastSaved = useRef(0);
-  const ep = parseEpisode(file.name);
 
-  useEffect(() => () => URL.revokeObjectURL(url), [url]);
   useEffect(() => {
-    if (!sub) return;
-    let u: string | null = null;
-    void sub.text().then((t) => {
-      u = URL.createObjectURL(new Blob([/\.srt$/i.test(sub.name) ? srtToVtt(t) : t], { type: 'text/vtt' }));
-      setVtt(u);
+    let alive = true;
+    let made: string | null = null;
+    source
+      .url()
+      .then((u) => {
+        made = u;
+        if (alive) setUrl(u);
+      })
+      .catch((e) => alive && setError(e instanceof Error ? e.message : 'No se pudo abrir el capítulo.'));
+    void source.subtitles?.().then((t) => {
+      if (!alive || !t) return;
+      const v = URL.createObjectURL(new Blob([srtToVtt(t)], { type: 'text/vtt' }));
+      setVtt(v);
     });
     return () => {
-      if (u) URL.revokeObjectURL(u);
+      alive = false;
+      if (made?.startsWith('blob:')) URL.revokeObjectURL(made);
     };
-  }, [sub]);
+  }, [source]);
+  useEffect(() => () => {
+    if (vtt) URL.revokeObjectURL(vtt);
+  }, [vtt]);
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -144,13 +182,13 @@ function VideoOverlay({ drama, file, sub, hasNext, onNext, onClose }: { drama: D
     const now = Date.now();
     if (!force && now - lastSaved.current < 5000) return;
     lastSaved.current = now;
-    void saveProgress(drama.id, { key: fileKey(file), name: file.name, ep, time: v.currentTime, duration: v.duration, at: now });
+    void saveProgress(dramaId, { key: source.key, name: source.name, ep: source.ep, time: v.currentTime, duration: v.duration, at: now });
   };
 
   const onLoaded = () => {
     const v = video.current;
     if (!v) return;
-    const prev = (dramaDoc.get().dramas.find((d) => d.id === drama.id)?.watched ?? []).find((x) => x.key === fileKey(file));
+    const prev = (dramaDoc.get().dramas.find((d) => d.id === dramaId)?.watched ?? []).find((x) => x.key === source.key);
     const t = prev ? resumeAt(prev.time, v.duration) : null;
     if (t !== null) {
       v.currentTime = t;
@@ -165,14 +203,14 @@ function VideoOverlay({ drama, file, sub, hasNext, onNext, onClose }: { drama: D
   };
 
   return createPortal(
-    <div className="video-overlay" role="dialog" aria-modal="true" aria-label={`Reproduciendo ${file.name}`}>
+    <div className="video-overlay" role="dialog" aria-modal="true" aria-label={`Reproduciendo ${source.name}`}>
       <header className="video-top">
         <button className="btn ghost sm" onClick={close} style={{ color: '#fbf1ec' }}>
           ✕ Cerrar
         </button>
         <div className="grow" style={{ minWidth: 0 }}>
-          <span className="eyebrow" style={{ margin: 0 }}>{drama.title}</span>
-          <div className="video-name">{ep ? `Capítulo ${ep}` : file.name}</div>
+          <span className="eyebrow" style={{ margin: 0 }}>{dramaTitle}</span>
+          <div className="video-name">{source.ep ? `Capítulo ${source.ep}` : source.name}</div>
         </div>
         {hasNext && (
           <button className="btn sm secondary" onClick={() => (store(true), onNext())}>
@@ -183,7 +221,11 @@ function VideoOverlay({ drama, file, sub, hasNext, onNext, onClose }: { drama: D
       {error ? (
         <div className="video-error">
           <p>{error}</p>
-          <p className="small">Probá convertirlo a MP4 (H.264) o abrilo con el reproductor del teléfono.</p>
+          <p className="small">Si el formato no es compatible, convertilo a MP4 (H.264).</p>
+        </div>
+      ) : !url ? (
+        <div className="video-error">
+          <div className="spinner" aria-label="Cargando" />
         </div>
       ) : (
         <video
@@ -192,6 +234,7 @@ function VideoOverlay({ drama, file, sub, hasNext, onNext, onClose }: { drama: D
           controls
           playsInline
           preload="metadata"
+          crossOrigin={url.startsWith('blob:') ? undefined : 'anonymous'}
           onLoadedMetadata={onLoaded}
           onTimeUpdate={() => store()}
           onPause={() => store(true)}

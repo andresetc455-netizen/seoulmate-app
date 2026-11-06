@@ -18,6 +18,7 @@ export function SettingsPage() {
       <Install />
       <Backups />
       <Sync />
+      <CloudSettings />
       <AppVersion />
       <Danger />
       <p className="tiny muted center">Seoulmate v1.0 · Hecho con cariño, solo para vos</p>
@@ -441,6 +442,43 @@ function Danger() {
       <button className="btn danger sm" disabled={txt !== 'BORRAR'} onClick={() => wipeEverything()}>
         Borrar todo
       </button>
+    </section>
+  );
+}
+
+function CloudSettings() {
+  const st = useDoc(settingsDoc);
+  const [client, setClient] = useState(st.cloudClientId ?? '');
+  const [folder, setFolder] = useState(st.cloudFolder ?? '');
+  const [err, setErr] = useState<{ client?: string; folder?: string }>({});
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    const { isValidClientId, isShareLink, rememberClientId } = await import('../lib/onedrive');
+    const errs: { client?: string; folder?: string } = {};
+    if (client.trim() && !isValidClientId(client)) errs.client = 'Pegá el "Application (client) ID" (formato 1234abcd-…).';
+    if (folder.trim() && !isShareLink(folder)) errs.folder = 'Pegá el enlace de la carpeta de OneDrive (empieza con https://1drv.ms/ o https://onedrive.live.com/).';
+    setErr(errs);
+    if (errs.client || errs.folder) return;
+    await settingsDoc.update((x) => ({ ...x, cloudClientId: client.trim(), cloudFolder: folder.trim() }));
+    rememberClientId(client.trim());
+    toast('Nube configurada');
+  };
+  return (
+    <section className="card">
+      <span className="eyebrow">K-Drama Diary</span>
+      <h2>En la nube (OneDrive)</h2>
+      <p className="small muted">
+        Capítulos guardados en una carpeta de OneDrive compartida con su cuenta de Microsoft. Solo se puede ver esa carpeta, nunca el resto del OneDrive. Guía: docs/GUIA-ONEDRIVE.md.
+      </p>
+      <form onSubmit={save} noValidate>
+        <Field label="ID de la app de Microsoft" error={err.client}>
+          <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="1234abcd-…" autoComplete="off" spellCheck={false} />
+        </Field>
+        <Field label="Enlace de la carpeta compartida" error={err.folder}>
+          <input value={folder} onChange={(e) => setFolder(e.target.value)} inputMode="url" placeholder="https://1drv.ms/f/…" autoComplete="off" spellCheck={false} />
+        </Field>
+        <button className="btn sm">Guardar</button>
+      </form>
     </section>
   );
 }

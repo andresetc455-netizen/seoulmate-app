@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useDoc, upsert, removeById, newId } from '../lib/store';
 import { dramaDoc } from '../lib/docs';
 import { validate, hasErrors } from '../lib/validation';
@@ -10,6 +11,7 @@ import { isYouTubeLink } from '../lib/youtube';
 import { playQueue } from '../lib/player';
 import { isInList, pickToDrama, ROMANCE_PICKS, whereToWatch } from '../lib/romance';
 import { LocalEpisodes } from './LocalPlayer';
+const CloudShows = lazy(() => import('./CloudShows').then((m) => ({ default: m.CloudShows })));
 import './dramas.css';
 
 function safeHttpsUrl(v: string | undefined): URL | null {
@@ -42,12 +44,13 @@ function WatchButton({ drama }: { drama: Drama }) {
   );
 }
 
-type DTab = 'lista' | 'romance' | 'ruleta' | 'recomendaciones';
+type DTab = 'lista' | 'nube' | 'romance' | 'ruleta' | 'recomendaciones';
 
 const save = (d: Drama) => dramaDoc.update((x) => ({ ...x, dramas: upsert(x.dramas, { ...d, updatedAt: Date.now() }) }));
 
 export function DramasPage() {
-  const [tab, setTab] = useState<DTab>('lista');
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<DTab>(params.get('tab') === 'nube' ? 'nube' : 'lista');
   const [edit, setEdit] = useState<Drama | 'new' | 'new-rec' | null>(null);
   return (
     <div className="page">
@@ -57,12 +60,18 @@ export function DramasPage() {
         onChange={setTab}
         tabs={[
           { id: 'lista', label: 'Mis dramas' },
+          { id: 'nube', label: 'En la nube' },
           { id: 'romance', label: 'Romance' },
           { id: 'ruleta', label: 'Ruleta' },
           { id: 'recomendaciones', label: 'Mis recomendaciones' },
         ]}
       />
       {tab === 'lista' && <DramaList onNew={() => setEdit('new')} onEdit={setEdit} />}
+      {tab === 'nube' && (
+        <Suspense fallback={<div className="spinner" aria-label="Cargando" />}>
+          <CloudShows />
+        </Suspense>
+      )}
       {tab === 'romance' && <RomanceIdeas />}
       {tab === 'ruleta' && <Roulette />}
       {tab === 'recomendaciones' && <Recommendations onNew={() => setEdit('new-rec')} onEdit={setEdit} />}

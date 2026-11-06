@@ -11,8 +11,8 @@ export interface Settings {
   notified?: string[]; // avisos ya mostrados, para no repetirlos
   newsSeenAt?: number; // última vez que miró las noticias
   newsNotifiedAt?: number;
-  driveClientId?: string; // llave OAuth (pública) de Google para leer Drive
-  driveFolder?: string; // carpeta de Drive con los capítulos (enlace o ID)
+  cloudClientId?: string; // ID de la app registrada en Microsoft (público, no es una contraseña)
+  cloudFolder?: string; // enlace de la carpeta de OneDrive compartida con ella
 }
 
 // ---------- BTS World ----------
@@ -130,7 +130,6 @@ export interface WatchProgress {
 }
 export interface DramaData {
   dramas: Drama[];
-  cloudSeen?: Record<string, number>; // capítulos de Drive vistos (id de archivo → fecha)
 }
 
 // ---------- Nuestro capítulo (romántico) ----------

@@ -139,3 +139,50 @@
   color: #fbf1ec;
   padding: 24px;
 }
+
+/* ---------- en la nube ---------- */
+.cloud-hero {
+  padding: 26px 20px;
+  background: linear-gradient(150deg, #fffdfa, var(--lavender-mist));
+}
+.cloud-hero h3 {
+  font-size: 1.5rem;
+  font-style: italic;
+  font-weight: 500;
+}
+.cloud-show {
+  padding: 14px 16px;
+}
+.cloud-show-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.cloud-show-head .grow {
+  display: flex;
+  flex-direction: column;
+}
+.cloud-title {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--burgundy);
+  line-height: 1.15;
+}
+.cloud-chevron {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--gold-line);
+  color: var(--burgundy);
+  font-size: 1.2rem;
+}
