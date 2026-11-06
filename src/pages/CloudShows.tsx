@@ -6,6 +6,7 @@ import { dramaDoc, settingsDoc } from '../lib/docs';
 import { clock, isDone } from '../lib/episodes';
 import { loadLibrary, NotSignedIn, resumeLogin, signIn, signOut, streamUrl, subtitleText, type CloudEpisode, type CloudShow } from '../lib/onedrive';
 import type { Drama } from '../lib/types';
+import { cloudConfig } from '../lib/cloudConfig';
 import { Empty, toast } from '../components/ui';
 import { VideoOverlay, type PlaySource } from './LocalPlayer';
 
@@ -27,8 +28,7 @@ async function ensureDrama(title: string): Promise<string> {
 export function CloudShows() {
   const settings = useDoc(settingsDoc);
   const dramas = useDoc(dramaDoc).dramas;
-  const clientId = settings.cloudClientId ?? '';
-  const folder = settings.cloudFolder ?? '';
+  const { clientId, folder } = cloudConfig(settings);
   const [signed, setSigned] = useState<boolean | null>(null);
   const [shows, setShows] = useState<CloudShow[] | null>(null);
   const [loading, setLoading] = useState(false);

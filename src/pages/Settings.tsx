@@ -8,6 +8,7 @@ import { getSupabase, supabaseRemote, syncConfigured, syncNow } from '../lib/syn
 import { isIos, isStandalone, promptInstall, useCanInstall } from '../lib/install';
 import { todayKey } from '../lib/dates';
 import { BUILD_ID, checkForUpdate } from '../lib/update';
+import { DEFAULT_CLOUD_CLIENT_ID, DEFAULT_CLOUD_FOLDER } from '../lib/cloudConfig';
 import { DeleteButton, Field, errorMessage, toast } from '../components/ui';
 
 export function SettingsPage() {
@@ -468,7 +469,8 @@ function CloudSettings() {
       <span className="eyebrow">K-Drama Diary</span>
       <h2>En la nube (OneDrive)</h2>
       <p className="small muted">
-        Capítulos guardados en una carpeta de OneDrive compartida con su cuenta de Microsoft. Solo se puede ver esa carpeta, nunca el resto del OneDrive. Guía: docs/GUIA-ONEDRIVE.md.
+        Capítulos guardados en una carpeta de OneDrive compartida con su cuenta de Microsoft. Solo se puede ver esa carpeta, nunca el resto del OneDrive.
+        {(DEFAULT_CLOUD_CLIENT_ID || DEFAULT_CLOUD_FOLDER) && ' Ya viene configurado: completá estos campos solo si querés cambiarlo.'}
       </p>
       <form onSubmit={save} noValidate>
         <Field label="ID de la app de Microsoft" error={err.client}>

@@ -4,6 +4,7 @@
 // Los videos se reproducen en streaming con un enlace temporal; nada se descarga ni se guarda.
 import { PublicClientApplication, InteractionRequiredAuthError, type AccountInfo } from '@azure/msal-browser';
 import { parseEpisode, sortEpisodes } from './episodes';
+import { DEFAULT_CLOUD_CLIENT_ID } from './cloudConfig';
 
 const GRAPH = 'https://graph.microsoft.com/v1.0';
 export const SCOPES = ['Files.Read.All'];
@@ -108,7 +109,7 @@ export function returningFromLogin(): boolean {
 export async function finishRedirectLogin(): Promise<void> {
   let id: string | null = null;
   try {
-    id = localStorage.getItem(CLIENT_KEY);
+    id = localStorage.getItem(CLIENT_KEY) || DEFAULT_CLOUD_CLIENT_ID;
   } catch {
     /* sin acceso */
   }
