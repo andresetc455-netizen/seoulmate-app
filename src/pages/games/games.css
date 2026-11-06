@@ -1094,3 +1094,114 @@
 .ttt-cell.filled {
   background: #fff;
 }
+
+/* Pesca del día */
+.fish-area {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fff3d6 0%, #cfe9f1 45%, #7fb6d6 100%);
+  min-height: 420px;
+}
+.fish-cat {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.fish-catch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+.fish-water {
+  text-align: center;
+  font-size: 2rem;
+  letter-spacing: 8px;
+}
+.fish-bar {
+  position: relative;
+  height: 34px;
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.75);
+  overflow: hidden;
+}
+.fish-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #8fd6a4;
+  display: flex;
+  justify-content: center;
+}
+.fish-gold {
+  width: 36%;
+  background: #f2cf5b;
+}
+.fish-marker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 6px;
+  margin-left: -3px;
+  border-radius: 3px;
+  background: #4a3a74;
+}
+.fish-btn {
+  font-size: 1.15rem;
+  padding: 16px;
+}
+.fish-bucket {
+  min-height: 32px;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+/* Puntero láser */
+.laser-area {
+  position: relative;
+  flex: 1;
+  min-height: 440px;
+  border-radius: 24px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  background: repeating-linear-gradient(90deg, #f5e6d3 0 46px, #efdcc5 46px 92px);
+}
+.laser-cat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.laser-dot {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #ff2d4a;
+  box-shadow: 0 0 12px 4px rgba(255, 45, 74, 0.55);
+  pointer-events: none;
+}
+.laser-dot.near {
+  box-shadow: 0 0 18px 8px rgba(255, 45, 74, 0.7);
+}
+.laser-hint {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 0.9rem;
+  pointer-events: none;
+}

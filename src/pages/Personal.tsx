@@ -17,7 +17,7 @@ export function PersonalPage() {
   return (
     <div className="page">
       <p className="small muted" style={{ marginTop: 0 }}>
-        🔐 Solo para vos. Este espacio está separado de "Nuestro capítulo" y nunca se incluye en los paquetes que se comparten.
+        Solo para vos. Este espacio está separado de "Nuestro capítulo" y nunca se incluye en los paquetes que se comparten.
       </p>
       <Tabs<PTab>
         label="Diario y organización"
@@ -115,7 +115,7 @@ function DiaryForm({ entry, onClose }: { entry: DiaryEntry | null; onClose: () =
       ...p,
       diary: upsert(p.diary, { id: entry?.id ?? newId(), createdAt: entry?.createdAt ?? now, updatedAt: now, ...f.values, title: f.values.title.trim() }),
     }));
-    toast(entry ? 'Entrada actualizada' : 'Guardado en tu diario 📖');
+    toast(entry ? 'Entrada actualizada' : 'Guardado en tu diario');
     onClose();
   };
   return (
@@ -183,7 +183,7 @@ function Tasks() {
         const r = rewardTask(pet, t.id);
         if (r.hearts) {
           await petDoc.replace(r.state);
-          toast(`¡Bien hecho! +${r.hearts} 💗 para ${pet.name}`);
+          toast(`¡Bien hecho! +${r.hearts} corazones para ${pet.name}`);
         }
       }
     }

@@ -25,9 +25,9 @@ const back = async (page: Page) => {
   await expect(page.getByRole('dialog')).toHaveCount(0);
 };
 
-test('Menú con 16 juegos y los juegos de música: ritmo, coreografía, burbujas', async ({ page }) => {
+test('Menú con 18 juegos y los juegos de música: ritmo, coreografía, burbujas', async ({ page }) => {
   await toGames(page);
-  await expect(page.getByRole('button', { name: /^Jugar / })).toHaveCount(16);
+  await expect(page.getByRole('button', { name: /^Jugar / })).toHaveCount(18);
   await page.screenshot({ path: `${SHOTS}/23-menu-juegos.png`, fullPage: true });
 
   await open(page, 'Ritmo Bangtan');

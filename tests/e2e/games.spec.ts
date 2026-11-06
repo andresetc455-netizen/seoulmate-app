@@ -30,7 +30,7 @@ test('Gatito nuevo y minijuegos BTS: memoria, lluvia morada, concierto y quiz co
   await adopt(page);
   await page.screenshot({ path: `${SHOTS}/14-gatito-nuevo.png` });
   await page.getByRole('tab', { name: /Juegos/ }).click();
-  await expect(page.getByRole('button', { name: /^Jugar / })).toHaveCount(16);
+  await expect(page.getByRole('button', { name: /^Jugar / })).toHaveCount(18);
   await page.screenshot({ path: `${SHOTS}/15-juegos.png`, fullPage: true });
   const before = await hearts(page);
 
@@ -99,7 +99,7 @@ test('Gatito nuevo y minijuegos BTS: memoria, lluvia morada, concierto y quiz co
   await page.getByLabel('Contraseña', { exact: true }).fill(PASS);
   await page.getByRole('button', { name: 'Desbloquear' }).click();
   // +10 de la visita del día (la primera desde que adoptó), además de lo ganado jugando.
-  await expect(page.getByTestId('hearts')).toHaveText(`${after + 10} 💗`);
+  await expect(page.getByTestId('hearts')).toHaveText(`${after + 10} ♥`);
 });
 
 test('Hablá con tu gatito: escucha el micrófono y repite con vocecita', async ({ page }) => {

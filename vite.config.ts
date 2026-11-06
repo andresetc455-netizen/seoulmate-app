@@ -13,7 +13,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
-      includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
+      includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png', 'sw-extra.js'],
       manifest: {
         name: 'Seoulmate',
         short_name: 'Seoulmate',
@@ -37,6 +37,15 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        importScripts: ['sw-extra.js'],
+        runtimeCaching: [
+          {
+            // Miniaturas de la galería libre (Wikimedia Commons): disponibles sin conexión una vez vistas.
+            urlPattern: /^https:\/\/upload\.wikimedia\.org\//,
+            handler: 'CacheFirst',
+            options: { cacheName: 'commons-thumbs', expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 60 }, cacheableResponse: { statuses: [0, 200] } },
+          },
+        ],
       },
     }),
   ],

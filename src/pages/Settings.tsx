@@ -20,7 +20,7 @@ export function SettingsPage() {
       <Sync />
       <AppVersion />
       <Danger />
-      <p className="tiny muted center">Seoulmate v1.0 · Hecho con cariño, solo para vos 💜</p>
+      <p className="tiny muted center">Seoulmate v1.0 · Hecho con cariño, solo para vos</p>
     </div>
   );
 }
@@ -177,7 +177,7 @@ function Install() {
     <section className="card">
       <h2>Instalar en el celular</h2>
       {standalone ? (
-        <p className="small">✅ Ya estás usando Seoulmate como app instalada.</p>
+        <p className="small">Ya estás usando Seoulmate como app instalada.</p>
       ) : can ? (
         <button className="btn" onClick={() => promptInstall()}>
           Instalar Seoulmate
@@ -228,7 +228,7 @@ function Backups() {
     try {
       const { kind: k, content } = await decryptBackup(importText, importPw);
       await applyBackup(k, content);
-      toast(k === 'chapter' ? 'Capítulo importado y combinado 💌' : 'Copia restaurada');
+      toast(k === 'chapter' ? 'Capítulo importado y combinado' : 'Copia restaurada');
       setImportText(null);
       setImportPw('');
       setImportErr('');

@@ -10,32 +10,43 @@ import {
   DeleteButton, Empty, Field, FormActions, ImagePicker, MediaImg, Modal, Tabs, toast, useForm,
 } from '../components/ui';
 import { IconDown, IconEdit, IconStar, IconUp } from '../components/icons';
-import { Blossom, Star4, HeartDeco } from '../components/deco';
 import { isYouTubeLink, musicSearchUrl } from '../lib/youtube';
 import { playQueue, type Track } from '../lib/player';
 import { saveImageFile } from '../lib/media';
 import { ShipsTab } from './Ships';
+import { FreeGallery } from './BtsGallery';
+import { MEMBERS } from '../lib/bts';
+import { downloadPhoto } from '../lib/commons';
+import { DISCOGRAPHY, memberFact, importDiscography } from '../lib/btsFacts';
+import { nextYearly, whenText } from '../lib/reminders';
+import { daysBetweenKeys, todayKey } from '../lib/dates';
+import { Link } from 'react-router-dom';
 import './bts.css';
 
-type BtsTab = 'musica' | 'integrantes' | 'photocards' | 'recuerdos' | 'listas' | 'ships';
+type BtsTab = 'musica' | 'integrantes' | 'photocards' | 'galeria' | 'recuerdos' | 'listas' | 'ships';
+const TABS: BtsTab[] = ['musica', 'integrantes', 'photocards', 'galeria', 'recuerdos', 'listas', 'ships'];
 
 export function BtsPage() {
   const [params] = useSearchParams();
-  const [tab, setTab] = useState<BtsTab>(params.get('tab') === 'ships' ? 'ships' : 'musica');
+  const [tab, setTab] = useState<BtsTab>(() => {
+    const t = params.get('tab') as BtsTab | null;
+    return t && TABS.includes(t) ? t : 'musica';
+  });
   return (
     <div className="page">
       <p className="small muted" style={{ marginTop: 0 }}>
-        Tu espacio de fan personal: todo lo que ves aquí lo agregás vos.
+        Tu espacio de fan personal. <Link to="/noticias">Noticias de BTS</Link>
       </p>
       <Tabs<BtsTab>
         label="Secciones de BTS World"
         value={tab}
         onChange={setTab}
         tabs={[
-          { id: 'ships', label: 'Ships 💞' },
+          { id: 'ships', label: 'Ships' },
           { id: 'musica', label: 'Música' },
           { id: 'integrantes', label: 'Integrantes' },
           { id: 'photocards', label: 'Photocards' },
+          { id: 'galeria', label: 'Galería' },
           { id: 'recuerdos', label: 'Recuerdos' },
           { id: 'listas', label: 'Listas' },
         ]}
@@ -43,6 +54,7 @@ export function BtsPage() {
       {tab === 'musica' && <Music />}
       {tab === 'integrantes' && <Members />}
       {tab === 'photocards' && <Photocards />}
+      {tab === 'galeria' && <FreeGallery />}
       {tab === 'recuerdos' && <Memories />}
       {tab === 'listas' && <Lists />}
       {tab === 'ships' && <ShipsTab />}
@@ -77,6 +89,7 @@ function Music() {
       <label className="check">
         <input type="checkbox" checked={onlyFav} onChange={(e) => setOnlyFav(e.target.checked)} /> Mostrar solo favoritos
       </label>
+      {(songs.length < 10 || albums.length < 5) && <DiscographyImport />}
       <div className="section-title">
         <h2>Canciones</h2>
         <button className="btn sm" onClick={() => setEditSong('new')}>
@@ -130,7 +143,7 @@ function Music() {
       ) : (
         shownAlbums.map((a) => (
           <div className="item" key={a.id} data-testid="album">
-            {a.coverId ? <MediaImg id={a.coverId} alt={a.title} className="thumb" /> : <div className="thumb album-ph" aria-hidden="true">💿</div>}
+            {a.coverId ? <MediaImg id={a.coverId} alt={a.title} className="thumb" /> : <div className="thumb album-ph" aria-hidden="true">♪</div>}
             <div className="grow">
               <div className="title">{a.title}</div>
               {a.year && <div className="small muted">{a.year}</div>}
@@ -153,6 +166,31 @@ function Music() {
   );
 }
 
+function DiscographyImport() {
+  return (
+    <div className="card butter" style={{ padding: 12 }}>
+      <strong>Discografía de BTS</strong>
+      <p className="small muted" style={{ margin: '2px 0 8px' }}>
+        Sumá los {DISCOGRAPHY.length} lanzamientos principales y sus canciones más conocidas. Después podés marcar favoritas y agregar el enlace de YouTube para escucharlas acá.
+      </p>
+      <button
+        className="btn sm"
+        onClick={async () => {
+          let n = 0;
+          await upd((d) => {
+            const r = importDiscography(d);
+            n = r.added;
+            return r.data;
+          });
+          toast(n ? `Se sumaron ${n} álbumes y canciones` : 'Ya tenías toda la discografía');
+        }}
+      >
+        Agregar discografía
+      </button>
+    </div>
+  );
+}
+
 function SongForm({ song, onClose }: { song: Song | null; onClose: () => void }) {
   const albums = useDoc(btsDoc).albums;
   const f = useForm({
@@ -170,7 +208,7 @@ function SongForm({ song, onClose }: { song: Song | null; onClose: () => void })
     if (hasErrors(errs)) return;
     const item: Song = { id: song?.id ?? newId(), createdAt: song?.createdAt ?? Date.now(), ...f.values, title: f.values.title.trim(), link: f.values.link.trim() };
     await upd((d) => ({ ...d, songs: upsert(d.songs, item) }));
-    toast(song ? 'Canción actualizada' : 'Canción agregada 🎶');
+    toast(song ? 'Canción actualizada' : 'Canción agregada');
     onClose();
   };
   return (
@@ -196,7 +234,7 @@ function SongForm({ song, onClose }: { song: Song | null; onClose: () => void })
         </Field>
         {f.values.title.trim() && (
           <a className="btn ghost sm" href={musicSearchUrl(`BTS ${f.values.title}`)} target="_blank" rel="noreferrer" style={{ marginTop: -6, marginBottom: 10 }}>
-            🔎 Buscar "{f.values.title.trim()}" en YouTube Music
+            Buscar "{f.values.title.trim()}" en YouTube Music
           </a>
         )}
         <Field label="¿Por qué te gusta? (opcional)" error={f.errors.note} help="Escribí con tus palabras; no hace falta copiar letras.">
@@ -238,7 +276,7 @@ function AlbumForm({ album, onClose }: { album: Album | null; onClose: () => voi
     if (album?.coverId && album.coverId !== f.values.coverId) await deleteMedia(album.coverId);
     const item: Album = { id: album?.id ?? newId(), createdAt: album?.createdAt ?? Date.now(), ...f.values, title: f.values.title.trim() };
     await upd((d) => ({ ...d, albums: upsert(d.albums, item) }));
-    toast(album ? 'Álbum actualizado' : 'Álbum agregado 💿');
+    toast(album ? 'Álbum actualizado' : 'Álbum agregado');
     onClose();
   };
   return (
@@ -300,7 +338,7 @@ function Members() {
           <div className="chips" style={{ marginTop: 4 }} data-testid="fav-members">
             {favs.map((m) => (
               <span key={m.id} className="tag rose" style={{ fontSize: '0.9rem' }}>
-                💜 {m.name}
+                {m.name}
               </span>
             ))}
           </div>
@@ -311,11 +349,12 @@ function Members() {
         <div className="item" key={m.id} style={{ alignItems: 'center' }} data-testid="member">
           <span className="rank">{i + 1}</span>
           <button className="member-open grow" onClick={() => setGallery(m.id)} aria-label={`Fotos de ${m.name}`}>
-            {m.avatarId ? <MediaImg id={m.avatarId} alt="" className="avatar" /> : <span className="avatar">{m.name.slice(0, 1)}</span>}
+            <MemberAvatar member={m} />
             <span style={{ minWidth: 0 }}>
               <span className="title" style={{ display: 'block' }}>
                 {m.name}
               </span>
+              <MemberFactLine name={m.name} />
               <span className="tiny muted">
                 {(m.photos ?? []).length} {(m.photos ?? []).length === 1 ? 'foto' : 'fotos'}
                 {m.note ? ` · ${m.note}` : ''}
@@ -347,6 +386,86 @@ function Members() {
 
 const MAX_MEMBER_PHOTOS = 60;
 
+// Degradé propio de cada integrante para el avatar sin foto (colores de la app, no oficiales).
+const MEMBER_TONES = ['#c7bbdc,#8e7aa8', '#e5c3c6,#b56f7c', '#d9c9b0,#a8875a', '#e8d9bd,#b48d55', '#efd3d6,#a8566a', '#cfc3e0,#6e5a8f', '#b56f7c,#6b2738'];
+
+const initials = (n: string) => n.replace(/[^\p{L}\s-]/gu, '').split(/[\s-]+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+
+/** Foto de perfil: la que ella eligió, si no su favorita de la galería libre, si no su animalito con color propio. */
+export function MemberAvatar({ member, size = 52 }: { member: Member; size?: number }) {
+  const gallery = useDoc(btsDoc).gallery ?? [];
+  const style = { width: size, height: size };
+  if (member.avatarId) return <MediaImg id={member.avatarId} alt="" className="avatar avatar-ring" style={style} />;
+  const pick = gallery.find((g) => g.member === member.name);
+  if (pick) return <img src={pick.thumb} alt="" className="avatar avatar-ring" style={style} referrerPolicy="no-referrer" />;
+  const i = MEMBERS.findIndex((x) => x.name.toLowerCase() === member.name.toLowerCase());
+  const [a, b] = MEMBER_TONES[(i >= 0 ? i : member.name.length) % MEMBER_TONES.length].split(',');
+  return (
+    <span className="avatar avatar-emoji" style={{ ...style, background: `linear-gradient(145deg, ${a}, ${b})`, fontSize: size * 0.4 }} aria-hidden="true">
+      {initials(member.name)}
+    </span>
+  );
+}
+
+/** Usar una favorita de la Galería libre como foto de perfil (se descarga y queda cifrada en el teléfono). */
+function GalleryAvatarPicker({ member, onSaved }: { member: Member; onSaved: (imageId: string) => Promise<void> }) {
+  const picks = (useDoc(btsDoc).gallery ?? []).filter((g) => g.member === member.name);
+  const [busy, setBusy] = useState(false);
+  if (!picks.length) return null;
+  const use = async (g: (typeof picks)[number]) => {
+    setBusy(true);
+    try {
+      const id = await saveImageFile(await downloadPhoto({ id: g.id, thumb: g.thumb, page: g.page, author: g.author, license: g.license, description: '' }));
+      await onSaved(id);
+      toast('Foto de perfil actualizada');
+    } catch {
+      toast('No se pudo descargar la foto. Revisá la conexión.', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <span className="tiny muted">Tus favoritas de la Galería · tocá una para usarla de perfil</span>
+      <div className="avatar-picks">
+        {picks.map((g) => (
+          <button key={g.id} onClick={() => use(g)} disabled={busy} aria-label="Usar de perfil">
+            <img src={g.thumb} alt="" referrerPolicy="no-referrer" />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MemberFactCard({ name }: { name: string }) {
+  const f = memberFact(name);
+  if (!f) return null;
+  return (
+    <div className="card soft" style={{ padding: 12, marginBottom: 12 }}>
+      <strong>{f.realName}</strong>
+      <div className="small">Nació el {new Date(Number(f.birthday.slice(0, 4)), Number(f.birthday.slice(5, 7)) - 1, Number(f.birthday.slice(8, 10))).toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+      <div className="small muted">Solista: {f.solo.join(' · ')}</div>
+    </div>
+  );
+}
+
+function MemberFactLine({ name }: { name: string }) {
+  const f = memberFact(name);
+  if (!f) return null;
+  const now = new Date();
+  const next = nextYearly(f.birthday.slice(5), now);
+  const days = daysBetweenKeys(todayKey(now), next);
+  const age = Number(next.slice(0, 4)) - Number(f.birthday.slice(0, 4));
+  const bday = new Date(2000, Number(f.birthday.slice(5, 7)) - 1, Number(f.birthday.slice(8, 10))).toLocaleDateString('es', { day: 'numeric', month: 'short' });
+  return (
+    <span className="tiny" style={{ display: 'block' }}>
+      Cumple el {bday}
+      {days === 0 ? ` · ¡Hoy cumple ${age}!` : days <= 30 ? ` · cumple ${age} ${whenText(days)}` : ''}
+    </span>
+  );
+}
+
 /** Álbum de fotos favoritas de cada integrante: imágenes que ella sube desde su galería. */
 function MemberGallery({ member, onClose }: { member: Member; onClose: () => void }) {
   const photos = member.photos ?? [];
@@ -370,7 +489,7 @@ function MemberGallery({ member, onClose }: { member: Member; onClose: () => voi
     if (ids.length) {
       const cur = btsDoc.get().members.find((x) => x.id === member.id) ?? member;
       await save({ ...cur, photos: [...ids, ...(cur.photos ?? [])], avatarId: cur.avatarId ?? ids[0] });
-      toast(ids.length === 1 ? 'Foto guardada 💜' : `${ids.length} fotos guardadas 💜`);
+      toast(ids.length === 1 ? 'Foto guardada' : `${ids.length} fotos guardadas`);
     }
     setBusy(false);
     if (input.current) input.current.value = '';
@@ -382,6 +501,8 @@ function MemberGallery({ member, onClose }: { member: Member; onClose: () => voi
   };
   return (
     <Modal title={`Fotos de ${member.name}`} onClose={onClose}>
+      <MemberFactCard name={member.name} />
+      <GalleryAvatarPicker member={member} onSaved={(id) => save({ ...member, avatarId: id, photos: [id, ...(member.photos ?? [])] })} />
       <button className="btn block" onClick={() => input.current?.click()} disabled={busy}>
         {busy ? 'Guardando…' : '+ Subir fotos'}
       </button>
@@ -479,23 +600,9 @@ export function PhotocardView({ pc, large }: { pc: Pick<Photocard, 'imageId' | '
       <div className="pc-img">
         <MediaImg id={pc.imageId} alt={pc.caption || 'Photocard'} />
       </div>
-      {pc.frame === 'estrellas' && (
-        <>
-          <Star4 size={large ? 26 : 16} style={{ position: 'absolute', top: 6, right: 6 }} />
-          <Star4 size={large ? 18 : 11} color="#fff" style={{ position: 'absolute', bottom: 34, left: 8 }} />
-        </>
-      )}
-      {pc.frame === 'cerezo' && (
-        <>
-          <Blossom size={large ? 34 : 22} style={{ position: 'absolute', top: -6, left: -6 }} />
-          <Blossom size={large ? 24 : 15} style={{ position: 'absolute', bottom: 30, right: -4 }} />
-        </>
-      )}
-      {pc.frame === 'encaje' && <HeartDeco size={large ? 22 : 14} color="#c97f9c" style={{ position: 'absolute', top: 8, right: 8 }} />}
       <figcaption>
         {pc.member && <strong>{pc.member}</strong>}
-        {pc.member && pc.caption ? ' · ' : ''}
-        {pc.caption}
+        {pc.caption && <span>{pc.caption}</span>}
       </figcaption>
     </figure>
   );
@@ -601,7 +708,7 @@ function PhotocardForm({ pc, collections, onClose }: { pc: Photocard | null; col
       collection: f.values.collection.trim(),
     };
     await upd((d) => ({ ...d, photocards: upsert(d.photocards, item) }));
-    toast(pc ? 'Photocard actualizada' : 'Photocard creada ✨');
+    toast(pc ? 'Photocard actualizada' : 'Photocard creada');
     onClose();
   };
   return (

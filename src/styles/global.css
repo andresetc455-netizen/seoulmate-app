@@ -895,3 +895,8 @@ body.player-open .fab {
   object-fit: cover;
   display: block;
 }
+
+.news-item {
+  color: inherit;
+  text-decoration: none;
+}

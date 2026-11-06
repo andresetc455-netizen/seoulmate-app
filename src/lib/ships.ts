@@ -1,29 +1,40 @@
 // Ships de BTS: avatares chibi dibujados (sin fotos), acciones tiernas y apodos editables.
 
+export type HairStyle = 'side' | 'curtain' | 'mullet' | 'wavy' | 'fluffy' | 'shaggy' | 'curly' | 'long';
+export type Outfit = 'jacket' | 'hoodie' | 'shirt' | 'knit' | 'tee' | 'blazer';
+
 export interface ShipMember {
   id: string;
   name: string;
   emoji: string;
-  hair: string;
-  outfit: string;
-  style: 'side' | 'curtain' | 'spiky' | 'fluffy' | 'bowl' | 'curly' | 'long';
+  hair: string; // color base del pelo
+  outfit: string; // color de la ropa
+  style: HairStyle;
+  wear: Outfit;
+  eyes: string; // color del iris
+  skin?: string;
   bts?: boolean;
   glasses?: boolean;
   labret?: boolean;
   highlights?: string;
+  moles?: Array<[number, number]>; // lunares característicos (coordenadas del dibujo)
+  dimples?: boolean;
+  earrings?: boolean;
+  eyeSmile?: boolean; // los ojos se cierran al sonreír
 }
 
+// Personajes estilo anime inspirados en rasgos conocidos de cada uno (dibujos originales, sin fotos).
 export const SHIP_MEMBERS: ShipMember[] = [
-  { id: 'rm', name: 'RM', emoji: '🐨', hair: '#6b5a8e', outfit: '#8e7cc3', style: 'side' },
-  { id: 'jin', name: 'Jin', emoji: '🐹', hair: '#d98aa8', outfit: '#f3a6c0', style: 'curtain' },
-  { id: 'suga', name: 'SUGA', emoji: '🐱', hair: '#9ed9c6', outfit: '#5b5470', style: 'bowl' },
-  { id: 'jhope', name: 'j-hope', emoji: '🐿️', hair: '#e89a5b', outfit: '#f6cd5c', style: 'spiky' },
-  { id: 'jimin', name: 'Jimin', emoji: '🐥', hair: '#f1d27a', outfit: '#f6b2c8', style: 'fluffy' },
-  { id: 'v', name: 'V', emoji: '🐯', hair: '#5a6fa8', outfit: '#7aa0d8', style: 'curtain' },
-  { id: 'jk', name: 'Jung Kook', emoji: '🐰', hair: '#2f2a3a', outfit: '#3d3350', style: 'fluffy' },
+  { id: 'rm', name: 'RM', emoji: '🐨', hair: '#2b2433', outfit: '#6f7d5c', style: 'side', wear: 'jacket', eyes: '#4a3428', dimples: true },
+  { id: 'jin', name: 'Jin', emoji: '🐹', hair: '#3a2a26', outfit: '#f2a7bf', style: 'curtain', wear: 'knit', eyes: '#523a2c' },
+  { id: 'suga', name: 'SUGA', emoji: '🐱', hair: '#1d1a22', outfit: '#3e4352', style: 'mullet', wear: 'hoodie', eyes: '#3c2c26', skin: '#fff1e6' },
+  { id: 'jhope', name: 'j-hope', emoji: '🐿️', hair: '#2e2026', outfit: '#f3c34f', style: 'wavy', wear: 'shirt', eyes: '#4d3226', earrings: true },
+  { id: 'jimin', name: 'Jimin', emoji: '🐥', hair: '#d8b56a', outfit: '#f6f0f5', style: 'fluffy', wear: 'blazer', eyes: '#5a3d2b', eyeSmile: true, earrings: true },
+  { id: 'v', name: 'V', emoji: '🐯', hair: '#2a2230', outfit: '#3f5f8f', style: 'shaggy', wear: 'blazer', eyes: '#3d2a22', moles: [[61.6, 87.6]], earrings: true },
+  { id: 'jk', name: 'Jung Kook', emoji: '🐰', hair: '#18151d', outfit: '#232028', style: 'fluffy', wear: 'jacket', eyes: '#3a2820', moles: [[57.4, 101.6]], earrings: true },
   // Ellos dos, dibujados a partir de sus fotos.
-  { id: 'andres', name: 'Andrés', emoji: '🤓', hair: '#241a16', outfit: '#d9343c', style: 'curly', glasses: true },
-  { id: 'nicole', name: 'Nicole', emoji: '💐', hair: '#16100e', outfit: '#2a2530', style: 'long', labret: true, highlights: '#c99460' },
+  { id: 'andres', name: 'Andrés', emoji: '🤓', hair: '#241a16', outfit: '#d9343c', style: 'curly', wear: 'tee', eyes: '#3d2a20', glasses: true },
+  { id: 'nicole', name: 'Nicole', emoji: '💐', hair: '#16100e', outfit: '#2a2530', style: 'long', wear: 'knit', eyes: '#4a3024', labret: true, highlights: '#c99460' },
 ];
 
 export const BTS_IDS = ['rm', 'jin', 'suga', 'jhope', 'jimin', 'v', 'jk'];
@@ -140,13 +151,16 @@ export type Fx = 'hearts' | 'notes' | 'rain' | 'petals' | 'stars' | 'sparkles';
 export type Move = 'none' | 'close' | 'touch';
 export type Mood = 'love' | 'kiss' | 'blush' | 'happy';
 
+export type Scene = 'cafe' | 'night' | 'rain' | 'park' | 'wedding' | 'kitchen' | 'karaoke' | 'sofa' | 'booth' | 'city';
+
 export interface ShipAction {
   id: string;
   label: string;
   emoji: string;
   move: Move;
   fx: Fx;
-  scene?: 'cafe' | 'night' | 'rain' | 'park' | 'wedding';
+  scene?: Scene;
+  cat?: 'eat' | 'play' | 'pet' | 'sleepy' | 'gift' | 'listen'; // qué hace el gatito si está en la escena
   prop?: string;
   moodA: Mood;
   moodB: Mood;
@@ -156,59 +170,84 @@ export interface ShipAction {
 
 export const SHIP_ACTIONS: ShipAction[] = [
   {
-    id: 'beso', label: 'Beso', emoji: '💋', move: 'touch', fx: 'hearts', moodA: 'kiss', moodB: 'kiss',
+    id: 'beso', cat: 'gift', label: 'Beso', emoji: '💋', move: 'touch', fx: 'hearts', moodA: 'kiss', moodB: 'kiss',
     lines: ['{a} y {b} se dan un beso de película 💋', '{a} le roba un beso a {b} y los dos se ponen rojos 😳', 'Muak 💜 {a} besó a {b} delante de ARMY'],
     groupLines: ['Ronda de besos: {todos} se dan besitos uno por uno 💋', '{a} le da un beso a cada uno: {resto} no saben dónde meterse 😳'],
   },
   {
-    id: 'mejilla', label: 'Besito en el cachete', emoji: '😚', move: 'touch', fx: 'sparkles', moodA: 'kiss', moodB: 'blush',
+    id: 'mejilla', cat: 'pet', label: 'Besito en el cachete', emoji: '😚', move: 'touch', fx: 'sparkles', moodA: 'kiss', moodB: 'blush',
     lines: ['{a} le da un besito en el cachete a {b}, que no sabe dónde meterse 🙈', '{b} recibe un piquito sorpresa de {a} 😚'],
     groupLines: ['Ronda de besitos en el cachete entre {todos} 😚', '{resto} le llenan los cachetes de besitos a {a} 🙈'],
   },
   {
-    id: 'abrazo', label: 'Abrazo', emoji: '🤗', move: 'touch', fx: 'hearts', moodA: 'happy', moodB: 'love',
+    id: 'abrazo', cat: 'pet', label: 'Abrazo', emoji: '🤗', move: 'touch', fx: 'hearts', moodA: 'happy', moodB: 'love',
     lines: ['{a} abraza fuerte a {b} y no lo suelta más 🤗', 'Abrazo de oso entre {a} y {b} 🧸'],
     groupLines: ['¡Abrazo grupal! {todos} todos apretujados 🤗', '{a} abraza a {resto} y no los suelta más 🧸'],
   },
   {
-    id: 'mano', label: 'De la mano', emoji: '🫶', move: 'close', fx: 'sparkles', prop: '🫶', moodA: 'blush', moodB: 'blush',
+    id: 'mano', cat: 'play', label: 'De la mano', emoji: '🫶', move: 'close', fx: 'sparkles', prop: '🫶', moodA: 'blush', moodB: 'blush',
     lines: ['{a} y {b} se toman de la mano “sin querer” 🫶', '{a} entrelaza los dedos con {b} en pleno ensayo 👀'],
     groupLines: ['{todos} hacen una ronda de la mano 🫶', '{a} agarra de la mano a {resto} y salen a pasear 💜'],
   },
   {
-    id: 'cita', label: 'Cita en un café', emoji: '☕', move: 'close', fx: 'hearts', scene: 'cafe', prop: '☕🍰', moodA: 'love', moodB: 'happy',
+    id: 'cita', cat: 'eat', label: 'Cita en un café', emoji: '☕', move: 'close', fx: 'hearts', scene: 'cafe', prop: '☕🍰', moodA: 'love', moodB: 'happy',
     lines: ['{a} invita a {b} a un café en Seúl ☕', 'Cita secreta: {a} y {b} comparten una torta de frutilla 🍰'],
     groupLines: ['Cita múltiple en un café: {todos} comparten una torta gigante 🍰', '{a} invita a {resto} a tomar un café ☕'],
   },
   {
-    id: 'baile', label: 'Baile lento', emoji: '💃', move: 'touch', fx: 'notes', moodA: 'love', moodB: 'love',
+    id: 'baile', cat: 'play', label: 'Baile lento', emoji: '💃', move: 'touch', fx: 'notes', moodA: 'love', moodB: 'love',
     lines: ['{a} y {b} bailan lento como en un dorama 🎶', '{a} saca a bailar a {b} y lo hace girar 💫'],
     groupLines: ['{todos} bailan lento en ronda 🎶', 'Coreografía romántica: {a} baila con {resto} 💫'],
   },
   {
-    id: 'serenata', label: 'Serenata', emoji: '🎤', move: 'none', fx: 'notes', prop: '🎤', moodA: 'happy', moodB: 'love',
+    id: 'serenata', cat: 'listen', label: 'Serenata', emoji: '🎤', move: 'none', fx: 'notes', prop: '🎤', moodA: 'happy', moodB: 'love',
     lines: ['{a} le canta una serenata a {b} 🎤', '{a} le dedica una canción a {b} y ARMY grita 😭'],
     groupLines: ['{a} les canta una serenata a {resto} 🎤', '{todos} cantan juntos una canción de amor 🎶'],
   },
   {
-    id: 'paraguas', label: 'Bajo la lluvia', emoji: '☂️', move: 'touch', fx: 'rain', scene: 'rain', prop: '☂️', moodA: 'blush', moodB: 'love',
+    id: 'paraguas', cat: 'listen', label: 'Bajo la lluvia', emoji: '☂️', move: 'touch', fx: 'rain', scene: 'rain', prop: '☂️', moodA: 'blush', moodB: 'love',
     lines: ['{a} comparte el paraguas con {b}, bien pegaditos ☂️', 'Escena de K-drama: {a} y {b} bajo la lluvia 🌧️'],
     groupLines: ['{todos} se apretujan bajo un solo paraguas ☂️', '{a} intenta tapar a {resto} con su paraguas y nadie entra 😂'],
   },
   {
-    id: 'estrellas', label: 'Mirar estrellas', emoji: '🌙', move: 'close', fx: 'stars', scene: 'night', moodA: 'love', moodB: 'love',
+    id: 'estrellas', cat: 'sleepy', label: 'Mirar estrellas', emoji: '🌙', move: 'close', fx: 'stars', scene: 'night', moodA: 'love', moodB: 'love',
     lines: ['{a} y {b} miran las estrellas en el Han 🌙', '{a} le dice a {b} que es su estrella favorita ✨'],
     groupLines: ['{todos} miran las estrellas acostados en el Han 🌙', '{a} le pide un deseo a una estrella por {resto} ✨'],
   },
   {
-    id: 'picnic', label: 'Picnic', emoji: '🧺', move: 'close', fx: 'petals', scene: 'park', prop: '🧺🍓', moodA: 'happy', moodB: 'happy',
+    id: 'picnic', cat: 'eat', label: 'Picnic', emoji: '🧺', move: 'close', fx: 'petals', scene: 'park', prop: '🧺🍓', moodA: 'happy', moodB: 'happy',
     lines: ['{a} le da frutillas en la boca a {b} 🍓', 'Picnic bajo los cerezos para {a} y {b} 🌸'],
     groupLines: ['Picnic gigante bajo los cerezos para {todos} 🌸', '{a} le da frutillas en la boca a {resto} 🍓'],
   },
   {
-    id: 'boda', label: 'Casamiento', emoji: '💍', move: 'touch', fx: 'petals', scene: 'wedding', prop: '💍', moodA: 'love', moodB: 'love',
+    id: 'boda', cat: 'gift', label: 'Casamiento', emoji: '💍', move: 'touch', fx: 'petals', scene: 'wedding', prop: '💍', moodA: 'love', moodB: 'love',
     lines: ['¡Sí, quiero! {a} y {b} se casan 💍', '{a} se arrodilla y le pide casamiento a {b} 💐'],
     groupLines: ['¡Casamiento múltiple! {todos} dicen “sí, quiero” 💍', '{a} les pide casamiento a {resto} y todos dicen que sí 💐'],
+  },
+  {
+    id: 'selfie', cat: 'play', label: 'Selfie', emoji: '🤳', move: 'touch', fx: 'sparkles', scene: 'city', prop: '📱', moodA: 'happy', moodB: 'love',
+    lines: ['{a} y {b} se sacan una selfie cachete con cachete 🤳', '{a} le pide una selfie a {b} y sale con los ojos cerrados 😂'],
+    groupLines: ['Selfie grupal: {todos} apretados para entrar en la foto 🤳', '{a} intenta sacar una selfie con {resto} y nadie entra 📱'],
+  },
+  {
+    id: 'cocinar', cat: 'eat', label: 'Cocinar juntos', emoji: '🍳', move: 'close', fx: 'sparkles', scene: 'kitchen', prop: '🍳🥘', moodA: 'happy', moodB: 'happy',
+    lines: ['{a} y {b} cocinan ramyeon a medianoche 🍜', '{a} le enseña a {b} a hacer kimchi y terminan llenos de harina 🍳'],
+    groupLines: ['{todos} cocinan juntos una cena coreana 🍳', '{a} cocina para {resto} y todos piden más 🥘'],
+  },
+  {
+    id: 'karaoke', cat: 'listen', label: 'Karaoke', emoji: '🎙️', move: 'none', fx: 'notes', scene: 'karaoke', prop: '🎙️', moodA: 'happy', moodB: 'love',
+    lines: ['{a} y {b} cantan a dúo en un noraebang 🎙️', '{a} le dedica una canción de BTS a {b} en el karaoke 🎶'],
+    groupLines: ['Noche de karaoke: {todos} cantan a los gritos 🎙️', '{a} agarra el micrófono y {resto} hacen los coros 🎶'],
+  },
+  {
+    id: 'kdrama', cat: 'sleepy', label: 'Ver un K-drama', emoji: '📺', move: 'touch', fx: 'hearts', scene: 'sofa', prop: '📺🍿', moodA: 'blush', moodB: 'love',
+    lines: ['{a} y {b} ven un K-drama abrazados en el sillón 📺', '{a} llora con el final del dorama y {b} lo consuela 🥹'],
+    groupLines: ['Maratón de K-dramas: {todos} en el mismo sillón 📺', '{a} elige el dorama y {resto} traen pochoclos 🍿'],
+  },
+  {
+    id: 'cabina', cat: 'gift', label: 'Fotocabina', emoji: '📸', move: 'touch', fx: 'stars', scene: 'booth', prop: '📸', moodA: 'kiss', moodB: 'blush',
+    lines: ['{a} y {b} se sacan fotos en una cabina de Hongdae 📸', 'Flash: {a} le da un beso a {b} justo en la última foto 📸'],
+    groupLines: ['{todos} se apretujan en una fotocabina de Hongdae 📸', '{a} posa con {resto} con orejitas de conejo 🐰📸'],
   },
 ];
 

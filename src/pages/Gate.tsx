@@ -54,7 +54,7 @@ export function SetupScreen({ onDone }: { onDone: () => Promise<void> }) {
     <div className="gate">
       <Hero subtitle="Un rincón privado hecho especialmente para vos." />
       <form className="card tape" onSubmit={submit} noValidate>
-        <h2>Bienvenida 💜</h2>
+        <h2>Bienvenida</h2>
         <Field label="¿Cómo querés que te llame?" error={errors.nickname}>
           <input value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="Tu nombre o apodo" maxLength={40} autoComplete="nickname" />
         </Field>

@@ -7,6 +7,10 @@ export interface Settings {
   authorPin: { salt: string; hash: string } | null;
   customPhrases: string[];
   onboarded: boolean;
+  notify?: boolean; // avisos del sistema (fechas y noticias)
+  notified?: string[]; // avisos ya mostrados, para no repetirlos
+  newsSeenAt?: number; // última vez que miró las noticias
+  newsNotifiedAt?: number;
 }
 
 // ---------- BTS World ----------
@@ -68,6 +72,25 @@ export interface BtsData {
   memories: FanMemory[];
   lists: FanList[];
   nicknames?: Record<string, string>; // apodos editables para la sección Ships
+  gallery?: GalleryPick[]; // fotos favoritas de la galería libre (Wikimedia Commons)
+  shipFavs?: string[][]; // ships favoritos (ids de integrantes)
+  shipMoments?: ShipMoment[]; // escenas guardadas como imagen
+}
+export interface ShipMoment {
+  id: string;
+  imageId: string;
+  title: string;
+  line: string;
+  createdAt: number;
+}
+export interface GalleryPick {
+  id: string; // título del archivo en Commons
+  member: string;
+  thumb: string;
+  page: string; // página del archivo (autoría y licencia)
+  author: string;
+  license: string;
+  savedAt: number;
 }
 
 // ---------- K-Drama Diary ----------

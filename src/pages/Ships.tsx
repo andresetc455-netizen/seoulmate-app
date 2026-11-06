@@ -1,144 +1,83 @@
-import { useMemo, useState, type CSSProperties } from 'react';
-import { useDoc } from '../lib/store';
-import { btsDoc } from '../lib/docs';
-import { toast } from '../components/ui';
+import { useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useDoc, newId } from '../lib/store';
+import { btsDoc, petDoc } from '../lib/docs';
+import { deleteMedia, getMediaData, saveMediaData } from '../lib/media';
+import { renderMoment, shareImage } from '../lib/moment';
+import { DeleteButton, MediaImg, Modal, toast } from '../components/ui';
+import { Cat } from '../components/Cat';
 import {
   BTS_IDS, SHIP_ACTIONS, SHIP_MEMBERS, FORBIDDEN_NICKNAME_MSG, NICKNAME_MAX, actionLine, compatibility, displayName,
-  isForbiddenNickname, joinNames, memberById, nicknamesOf, shipName, type Mood, type ShipAction, type ShipMember,
+  groupKey, isForbiddenNickname, joinNames, memberById, nicknamesOf, shipName, type ShipAction,
 } from '../lib/ships';
+import type { ShipMoment } from '../lib/types';
+import { ShipFigure } from './ShipChar';
 import './ships.css';
 
-// ---------- Chibi dibujado en SVG (caricatura, sin fotos) ----------
-function Hair({ m }: { m: ShipMember }) {
-  const c = m.hair;
-  switch (m.style) {
-    case 'side':
-      return <path d="M14 46 Q14 12 50 12 Q86 12 86 46 Q74 30 52 28 Q34 34 14 46Z" fill={c} />;
-    case 'curtain':
-      return <path d="M14 50 Q12 12 50 12 Q88 12 86 50 Q80 34 66 30 Q58 40 50 30 Q42 40 34 30 Q20 34 14 50Z" fill={c} />;
-    case 'spiky':
-      return <path d="M14 46 L20 18 L30 26 L38 10 L48 22 L58 8 L66 22 L76 12 L80 28 L86 46 Q70 30 50 30 Q30 30 14 46Z" fill={c} />;
-    case 'curly':
-      return (
-        <g fill={c}>
-          <path d="M14 48 Q12 14 50 12 Q88 14 86 48 Q78 34 50 32 Q22 34 14 48Z" />
-          {[[18, 36], [22, 24], [32, 16], [44, 11], [56, 11], [68, 16], [78, 24], [82, 36], [30, 30], [42, 26], [54, 26], [66, 30]].map(([x, y], i) => (
-            <circle key={i} cx={x} cy={y} r={8} />
-          ))}
-        </g>
-      );
-    case 'long':
-      return <path d="M14 50 Q12 12 50 12 Q88 12 86 50 Q80 34 66 31 L62 40 L56 30 L50 36 L44 30 L38 40 L34 31 Q20 34 14 50Z" fill={c} />;
-    case 'bowl':
-      return <path d="M13 50 Q12 12 50 12 Q88 12 87 50 Q86 36 80 36 L20 36 Q14 36 13 50Z" fill={c} />;
-    default:
-      return (
-        <g fill={c}>
-          <path d="M14 48 Q12 14 50 12 Q88 14 86 48 Q78 32 62 34 Q56 28 50 34 Q44 28 38 34 Q22 32 14 48Z" />
-          <circle cx="26" cy="22" r="10" />
-          <circle cx="50" cy="14" r="10" />
-          <circle cx="74" cy="22" r="10" />
-        </g>
-      );
-  }
-}
+// Partículas vectoriales (sin emojis) en la paleta de la app.
+const FX_SHAPES: Record<ShipAction['fx'], string[]> = {
+  hearts: ['heart', 'heart', 'dot'],
+  notes: ['note', 'dot', 'note'],
+  rain: ['drop', 'drop', 'drop'],
+  petals: ['petal', 'petal', 'dot'],
+  stars: ['spark', 'dot', 'spark'],
+  sparkles: ['spark', 'heart', 'dot'],
+};
+const FX_COLORS = ['#b56f7c', '#d9a7b0', '#b48d55', '#c7bbdc', '#8e3a50'];
 
-function Eyes({ mood }: { mood: Mood }) {
-  if (mood === 'love')
-    return (
-      <g fill="#e2577f">
-        <path d="M33 50 q-4-5 0-7 q2-1 3 1 q1-2 3-1 q4 2 0 7 l-3 3z" />
-        <path d="M61 50 q-4-5 0-7 q2-1 3 1 q1-2 3-1 q4 2 0 7 l-3 3z" />
-      </g>
-    );
-  if (mood === 'kiss' || mood === 'happy')
-    return (
-      <g stroke="#3d3350" strokeWidth="2.6" fill="none" strokeLinecap="round">
-        <path d={mood === 'kiss' ? 'M31 49 q5 3 10 0' : 'M31 50 q5-5 10 0'} />
-        <path d={mood === 'kiss' ? 'M59 49 q5 3 10 0' : 'M59 50 q5-5 10 0'} />
-      </g>
-    );
+function FxShape({ kind, color }: { kind: string; color: string }) {
+  const d: Record<string, string> = {
+    heart: 'M12 21s-7-4.6-9.3-9C1 8.6 3 5 6.5 5c2 0 3.4 1.1 4.2 2.4h2.6C14.1 6.1 15.5 5 17.5 5 21 5 23 8.6 21.3 12 19 16.4 12 21 12 21z',
+    petal: 'M12 3c4 4 5 9 0 18C7 12 8 7 12 3z',
+    spark: 'M12 2l1.8 7.2L21 12l-7.2 1.8L12 21l-1.8-7.2L3 12l7.2-1.8z',
+    drop: 'M12 3c3 5 6 8.5 6 12a6 6 0 0 1-12 0c0-3.5 3-7 6-12z',
+    note: 'M9 18a3 3 0 1 1-2-2.8V5l11-2v11a3 3 0 1 1-2-2.8V6.3L9 7.6z',
+    dot: 'M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z',
+  };
   return (
-    <g fill="#3d3350">
-      <ellipse cx="36" cy="49" rx="4" ry="5" />
-      <ellipse cx="64" cy="49" rx="4" ry="5" />
-      <circle cx="37.5" cy="47" r="1.4" fill="#fff" />
-      <circle cx="65.5" cy="47" r="1.4" fill="#fff" />
-    </g>
-  );
-}
-
-function Mouth({ mood }: { mood: Mood }) {
-  if (mood === 'kiss') return <path d="M47 63 q4-3 6 0 q-2 2 0 4 q-3 3-6 0" fill="#e2577f" />;
-  if (mood === 'blush') return <path d="M45 63 q5 3 10 0" stroke="#3d3350" strokeWidth="2.2" fill="none" strokeLinecap="round" />;
-  return <path d="M44 61 q6 7 12 0 z" fill="#c95a7a" />;
-}
-
-export function Chibi({ m, mood = 'happy', size = 120 }: { m: ShipMember; mood?: Mood; size?: number }) {
-  return (
-    <svg viewBox="0 0 100 130" width={size} height={size * 1.3} aria-hidden="true" className="chibi-svg">
-      {m.style === 'long' && <path d="M14 46 Q8 90 16 118 L34 112 L34 70 L66 70 L66 112 L84 118 Q92 90 86 46Z" fill={m.hair} />}
-      {m.style === 'long' && m.highlights && (
-        <path d="M20 52 Q15 85 20 114 M80 52 Q85 85 80 114 M27 60 Q24 86 28 111 M73 60 Q76 86 72 111" stroke={m.highlights} strokeWidth="2.2" fill="none" strokeLinecap="round" opacity="0.75" />
-      )}
-      <rect x="28" y="84" width="44" height="40" rx="16" fill={m.outfit} />
-      <circle cx="26" cy="98" r="8" fill="#ffe3cf" />
-      <circle cx="74" cy="98" r="8" fill="#ffe3cf" />
-      <circle cx="50" cy="48" r="36" fill="#ffe8d6" />
-      <Hair m={m} />
-      {m.highlights && (
-        <path d="M37 17 Q34 26 36 38 M63 17 Q66 26 64 38 M49 13 Q48 22 50 33 M24 26 Q19 36 17 46 M76 26 Q81 36 83 46" stroke={m.highlights} strokeWidth="2.2" fill="none" strokeLinecap="round" opacity="0.75" />
-      )}
-      <Eyes mood={mood} />
-      <ellipse cx="28" cy="58" rx="6" ry={mood === 'blush' ? 5 : 3.5} fill="#f6a5bd" opacity={mood === 'blush' ? 0.95 : 0.6} />
-      <ellipse cx="72" cy="58" rx="6" ry={mood === 'blush' ? 5 : 3.5} fill="#f6a5bd" opacity={mood === 'blush' ? 0.95 : 0.6} />
-      <Mouth mood={mood} />
-      {m.labret && <circle cx="50" cy="71" r="1.6" fill="#e4e6ec" stroke="#9a9caa" strokeWidth="0.5" />}
-      {m.glasses && (
-        <g stroke="#3f5270" strokeWidth="2" fill="#dbe7ff" fillOpacity="0.15">
-          <rect x="25" y="41" width="22" height="16" rx="4" />
-          <rect x="53" y="41" width="22" height="16" rx="4" />
-          <path d="M47 47 Q50 45 53 47" fill="none" />
-        </g>
-      )}
-      <text x="50" y="112" fontSize="16" textAnchor="middle">{m.emoji}</text>
+    <svg viewBox="0 0 24 24" width="1em" height="1em">
+      <path d={d[kind]} fill={color} opacity={kind === 'drop' ? 0.55 : 0.85} />
     </svg>
   );
 }
 
-const FX_CHARS: Record<ShipAction['fx'], string[]> = {
-  hearts: ['💜', '💗', '💕', '🩷', '💞'],
-  notes: ['🎶', '🎵', '💜', '🎶'],
-  rain: ['💧', '💧', '💧', '💜'],
-  petals: ['🌸', '🌸', '💮', '💗'],
-  stars: ['✨', '⭐', '🌟', '💫'],
-  sparkles: ['✨', '💖', '✨', '💫'],
-};
+/** Quita emojis de los textos de las acciones para un acabado más sobrio. */
+const plain = (t: string) => t.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, '').replace(/\s{2,}/g, ' ').trim();
 
-// ---------- Sección ----------
 const ORDER = SHIP_MEMBERS.map((m) => m.id);
 
 export function ShipsTab() {
   const data = useDoc(btsDoc);
+  const pet = useDoc(petDoc);
   const nicks = data.nicknames;
+  const favs = data.shipFavs ?? [];
+  const moments = data.shipMoments ?? [];
   const [sel, setSel] = useState<string[]>(['jimin', 'jk']);
   const [action, setAction] = useState<ShipAction | null>(null);
   const [run, setRun] = useState(0);
   const [editing, setEditing] = useState(false);
+  const [withCat, setWithCat] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [view, setView] = useState<ShipMoment | null>(null);
+  const stage = useRef<HTMLDivElement>(null);
 
   const members = sel.map((id) => memberById(id)!);
   const names = sel.map((id) => displayName(id, nicks));
   const n = sel.length;
   const group = n > 2;
-  const line = action ? actionLine(action, names, run) : `Elegí qué hacen ${joinNames(names)} 💜`;
+  const title = shipName(...sel);
+  const line = plain(action ? actionLine(action, names, run) : `Elegí qué hacen ${joinNames(names)}`);
   const pct = compatibility(...sel);
-  const size = Math.min(110, Math.floor(400 / n));
+  const size = Math.min(172, Math.floor(540 / n));
+  const isFav = favs.some((f) => groupKey(f) === groupKey(sel));
+  const scene = action?.scene ?? 'stage';
+  const showCat = withCat && pet.adopted;
 
   const fx = useMemo(
     () =>
       action
         ? Array.from({ length: 14 + n * 2 }, (_, i) => ({
-            ch: FX_CHARS[action.fx][i % FX_CHARS[action.fx].length],
+            kind: FX_SHAPES[action.fx][i % 3],
+            color: FX_COLORS[(i + run) % FX_COLORS.length],
             left: (i * 37 + run * 13) % 92,
             delay: (i % 7) * 0.22,
             dur: 2.2 + (i % 4) * 0.4,
@@ -182,14 +121,61 @@ export function ShipsTab() {
     doAction(SHIP_ACTIONS[Math.floor(Math.random() * SHIP_ACTIONS.length)]);
   };
 
+  const toggleFav = () =>
+    btsDoc.update((d) => {
+      const list = d.shipFavs ?? [];
+      const k = groupKey(sel);
+      return { ...d, shipFavs: list.some((f) => groupKey(f) === k) ? list.filter((f) => groupKey(f) !== k) : [[...sel], ...list].slice(0, 30) };
+    });
+
+  const saveMoment = async () => {
+    if (!stage.current) return;
+    setSaving(true);
+    try {
+      const url = await renderMoment(stage.current, scene, title, line);
+      const imageId = newId();
+      await saveMediaData(imageId, url);
+      const mo: ShipMoment = { id: newId(), imageId, title, line, createdAt: Date.now() };
+      await btsDoc.update((d) => ({ ...d, shipMoments: [mo, ...(d.shipMoments ?? [])].slice(0, 120) }));
+      toast('Momento guardado');
+    } catch (e) {
+      toast(e instanceof Error ? e.message : 'No se pudo guardar el momento', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="ships">
       <div className="card rose ship-head">
-        <h2 className="ship-title">{shipName(...sel)} 💞</h2>
+        <button type="button" className={`ship-fav ${isFav ? 'on' : ''}`} aria-pressed={isFav} aria-label={isFav ? 'Quitar de mis ships' : 'Guardar en mis ships'} onClick={toggleFav}>
+          {isFav ? '★' : '☆'}
+        </button>
+        <span className="eyebrow">Ship del momento</span>
+        <h2 className="ship-title">{title}</h2>
         <p className="small muted" style={{ margin: 0 }}>
-          Compatibilidad{group ? ' grupal' : ''}: <strong>{pct}%</strong> {pct > 94 ? '· almas gemelas 💍' : '· química total ✨'}
+          Compatibilidad{group ? ' grupal' : ''}: <strong>{pct}%</strong> {pct > 94 ? '· almas gemelas' : '· química total'}
         </p>
       </div>
+
+      {favs.length > 0 && (
+        <div className="chips ship-favs" aria-label="Mis ships">
+          {favs.map((f) => (
+            <button
+              key={groupKey(f)}
+              type="button"
+              className="chip"
+              aria-pressed={groupKey(f) === groupKey(sel)}
+              onClick={() => {
+                setSel(ORDER.filter((x) => f.includes(x)));
+                setAction(null);
+              }}
+            >
+              ★ {shipName(...ORDER.filter((x) => f.includes(x)))}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="ship-pickrow">
         <span className="small muted">Tocá a 2 o más ({n} elegidos)</span>
@@ -207,7 +193,7 @@ export function ShipsTab() {
             className={`ship-pick ${sel.includes(m.id) ? 'on' : ''}`}
             onClick={() => toggle(m.id)}
           >
-            <Chibi m={m} size={38} />
+            <ShipFigure m={m} size={40} head />
             <span>{m.name}</span>
           </button>
         ))}
@@ -215,18 +201,22 @@ export function ShipsTab() {
 
       <div
         key={run}
-        className={`ship-stage scene-${action?.scene ?? 'stage'} ${action ? `move-${action.move} act-${action.id}` : ''} ${group ? 'is-group' : ''} ${n >= 5 ? 'is-crowd' : ''}`}
+        ref={stage}
+        className={`ship-stage scene-${scene} ${action ? `move-${action.move} act-${action.id}` : ''} ${group ? 'is-group' : ''} ${n >= 5 ? 'is-crowd' : ''}`}
         data-testid="ship-stage"
       >
         <div className="ship-fx" aria-hidden="true">
           {fx.map((f, i) => (
             <span key={i} style={{ left: `${f.left}%`, animationDelay: `${f.delay}s`, animationDuration: `${f.dur}s` }} className={`fx-${action?.fx}`}>
-              {f.ch}
+              <FxShape kind={f.kind} color={f.color} />
             </span>
           ))}
         </div>
-        {action?.prop && <div className="ship-prop" aria-hidden="true">{action.prop}</div>}
-        <div className="ship-mid" aria-hidden="true">{action ? action.emoji : '💜'}</div>
+        {action?.move === 'touch' && (
+          <div className="ship-mid" aria-hidden="true">
+            <FxShape kind="heart" color="#b56f7c" />
+          </div>
+        )}
         <div className="ship-pair">
           {members.map((m, i) => (
             <div
@@ -234,29 +224,63 @@ export function ShipsTab() {
               className={`ship-chibi ${i === 0 ? 'lead' : ''}`}
               style={{ '--off': (n - 1) / 2 - i, '--size': `${size}px`, animationDelay: action?.id === 'baile' || action?.id === 'abrazo' ? undefined : `${i * 0.06}s` } as CSSProperties}
             >
-              <Chibi m={m} mood={(i === 0 ? action?.moodA : action?.moodB) ?? 'happy'} size={size} />
-              <span className="ship-name">{names[i]}</span>
+              <span data-snap-wrap>
+                <ShipFigure m={m} mood={(i === 0 ? action?.moodA : action?.moodB) ?? 'happy'} size={size} />
+              </span>
+              <span className="ship-name" data-snap="label">{names[i]}</span>
             </div>
           ))}
         </div>
+        {showCat && (
+          <div className="ship-cat" aria-label={`${pet.name} en la escena`}>
+            <Cat breed={pet.breed} accessory={pet.equipped.accessory} mood={action?.cat ?? 'idle'} size={n >= 5 ? 54 : 66} />
+          </div>
+        )}
       </div>
       <p className="ship-line" aria-live="polite">{line}</p>
+
+      <div className="row" style={{ gap: 8, marginBottom: 10 }}>
+        <button type="button" className="btn secondary grow" onClick={saveMoment} disabled={saving}>
+          {saving ? 'Guardando…' : 'Guardar momento'}
+        </button>
+        {pet.adopted && (
+          <button type="button" className="btn ghost" aria-pressed={withCat} onClick={() => setWithCat((c) => !c)}>
+            {withCat ? `Sin ${pet.name}` : `Con ${pet.name}`}
+          </button>
+        )}
+      </div>
 
       <div className="ship-actions">
         {SHIP_ACTIONS.map((act) => (
           <button key={act.id} type="button" className={`ship-act ${action?.id === act.id ? 'on' : ''}`} onClick={() => doAction(act)}>
-            <span className="ship-act-emoji">{act.emoji}</span>
             {group ? (GROUP_LABELS[act.id] ?? act.label) : act.label}
           </button>
         ))}
       </div>
       <button type="button" className="btn rose block" onClick={surprise} style={{ marginTop: 10 }}>
-        🎲 Ship sorpresa
+        Ship sorpresa
       </button>
 
       <div className="card soft" style={{ marginTop: 16 }}>
+        <span className="eyebrow">Álbum</span>
+        <h3 style={{ margin: '0 0 10px' }}>Momentos</h3>
+        {moments.length === 0 ? (
+          <p className="small muted" style={{ margin: 0 }}>Elegí una acción y tocá «Guardar momento» para armar tu álbum de escenas.</p>
+        ) : (
+          <div className="moment-grid" data-testid="moments">
+            {moments.map((mo) => (
+              <button key={mo.id} type="button" onClick={() => setView(mo)} aria-label={`Ver momento ${mo.title}`}>
+                <MediaImg id={mo.imageId} alt={mo.title} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {view && <MomentView mo={view} onClose={() => setView(null)} />}
+
+      <div className="card soft" style={{ marginTop: 16 }}>
         <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ margin: 0 }}>Apodos 🏷️</h3>
+          <h3 style={{ margin: 0 }}>Apodos</h3>
           <button type="button" className="btn sm secondary" onClick={() => setEditing((e) => !e)}>
             {editing ? 'Cerrar' : 'Editar'}
           </button>
@@ -269,6 +293,32 @@ export function ShipsTab() {
   );
 }
 
+function MomentView({ mo, onClose }: { mo: ShipMoment; onClose: () => void }) {
+  const share = async () => {
+    const url = await getMediaData(mo.imageId);
+    if (!url) return toast('La imagen no está disponible', 'error');
+    const r = await shareImage(url, `seoulmate-${mo.title.replace(/\W+/g, '-').toLowerCase()}.jpg`, `${mo.title} · ${mo.line}`);
+    if (r === 'downloaded') toast('Imagen descargada 📥');
+  };
+  const remove = async () => {
+    await deleteMedia(mo.imageId);
+    await btsDoc.update((d) => ({ ...d, shipMoments: (d.shipMoments ?? []).filter((x) => x.id !== mo.id) }));
+    onClose();
+  };
+  return (
+    <Modal title={mo.title} onClose={onClose}>
+      <MediaImg id={mo.imageId} alt={mo.title} style={{ width: '100%', borderRadius: 14, display: 'block' }} />
+      <p className="tiny muted" style={{ margin: '6px 0 10px' }}>{new Date(mo.createdAt).toLocaleString('es')}</p>
+      <div className="row" style={{ gap: 8 }}>
+        <button type="button" className="btn grow" onClick={share}>
+          Compartir
+        </button>
+        <DeleteButton onConfirm={remove} />
+      </div>
+    </Modal>
+  );
+}
+
 const GROUP_LABELS: Record<string, string> = {
   beso: 'Ronda de besos',
   mejilla: 'Ronda de besitos',
@@ -277,6 +327,8 @@ const GROUP_LABELS: Record<string, string> = {
   cita: 'Cita grupal',
   baile: 'Baile en ronda',
   boda: 'Casamiento múltiple',
+  selfie: 'Selfie grupal',
+  cabina: 'Fotocabina grupal',
 };
 
 function NicknameEditor({ saved }: { saved: Record<string, string> | undefined }) {

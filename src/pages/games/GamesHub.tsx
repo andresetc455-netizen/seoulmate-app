@@ -19,6 +19,8 @@ const SongGame = lazy(() => import('./SongGame').then((m) => ({ default: m.SongG
 const BubblesGame = lazy(() => import('./BubblesGame').then((m) => ({ default: m.BubblesGame })));
 const CafeGame = lazy(() => import('./CafeGame').then((m) => ({ default: m.CafeGame })));
 const CupsGame = lazy(() => import('./CupsGame').then((m) => ({ default: m.CupsGame })));
+const FishGame = lazy(() => import('./FishGame').then((m) => ({ default: m.FishGame })));
+const LaserGame = lazy(() => import('./LaserGame').then((m) => ({ default: m.LaserGame })));
 const TicTacToeGame = lazy(() => import('./TicTacToeGame').then((m) => ({ default: m.TicTacToeGame })));
 
 type Open = GameId | 'hablar' | null;
@@ -30,6 +32,8 @@ const SECTIONS: Array<{ title: string; games: GameDef[] }> = [
     title: 'Con tu gatito',
     games: [
       { id: 'hablar', title: 'Hablá con tu gatito', emoji: '🎙️', text: 'Decile algo y te lo repite con vocecita.', tone: 'g-rose' },
+      { id: 'pesca', title: 'Pesca del día', emoji: '🎣', text: 'Pescá a tiempo para tu gatito.', tone: 'g-mint' },
+      { id: 'laser', title: 'Puntero láser', emoji: '🔴', text: 'Que te persiga… sin atraparte.', tone: 'g-butter' },
       { id: 'cafe', title: 'Café de Mochi', emoji: '☕', text: 'Atendé los pedidos de los 7.', tone: 'g-butter' },
       { id: 'saltarin', title: 'Gatito saltarín', emoji: '🐾', text: 'Corré al concierto saltando obstáculos.', tone: 'g-mint' },
       { id: 'vasos', title: '¿Dónde está el gatito?', emoji: '🧋', text: 'Seguilo entre los vasos de bubble tea.', tone: 'g-violet' },
@@ -102,6 +106,8 @@ export function GamesHub({ pet }: { pet: PetState }) {
         {open === 'cafe' && <CafeGame onClose={close} />}
         {open === 'vasos' && <CupsGame onClose={close} />}
         {open === 'tateti' && <TicTacToeGame onClose={close} />}
+        {open === 'pesca' && <FishGame onClose={close} />}
+        {open === 'laser' && <LaserGame onClose={close} />}
       </Suspense>
     </div>
   );

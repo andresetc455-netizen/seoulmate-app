@@ -1,0 +1,510 @@
+/* =====================================================================
+   Seoulmate · capa visual "premium"
+   Paleta: rosa empolvado, crema, lavanda, bordó y dorado sutil.
+   Tipografías: Cormorant Garamond (títulos) y Manrope (texto).
+   Se carga después de global.css: redefine los tokens y refina los componentes base.
+   ===================================================================== */
+@import '@fontsource/cormorant-garamond/latin-500.css';
+@import '@fontsource/cormorant-garamond/latin-600.css';
+@import '@fontsource/cormorant-garamond/latin-500-italic.css';
+@import '@fontsource/manrope/latin-400.css';
+@import '@fontsource/manrope/latin-500.css';
+@import '@fontsource/manrope/latin-600.css';
+@import '@fontsource/manrope/latin-700.css';
+
+:root {
+  /* bordó (acento principal) */
+  --violet-deep: #6b2738;
+  --violet: #8e3a50;
+  --burgundy: #6b2738;
+  --burgundy-2: #8e3a50;
+  /* rosa empolvado */
+  --rose: #e5c3c6;
+  --rose-soft: #f6e8e6;
+  --rose-deep: #b56f7c;
+  /* lavanda */
+  --lavender: #c7bbdc;
+  --lavender-soft: #ebe5f1;
+  --lavender-mist: #f6f2f7;
+  /* crema y champaña */
+  --cream: #fbf6f0;
+  --cream-2: #f4ece3;
+  --butter: #ead9b8;
+  --butter-soft: #f7efe1;
+  /* dorado sutil */
+  --gold: #b48d55;
+  --gold-soft: #e8d9bd;
+  --gold-line: rgba(180, 141, 85, 0.35);
+  /* texto */
+  --ink: #2f2329;
+  --muted: #8b7a80;
+  --hair: rgba(107, 39, 56, 0.1);
+  --danger: #a8364f;
+  --ok: #5f8a73;
+  --radius: 22px;
+  --radius-sm: 14px;
+  --shadow-sm: 0 1px 2px rgba(47, 35, 41, 0.04), 0 6px 16px -8px rgba(107, 39, 56, 0.14);
+  --shadow: 0 2px 4px rgba(47, 35, 41, 0.04), 0 18px 38px -16px rgba(107, 39, 56, 0.26);
+  --shadow-photo: 0 1px 1px rgba(47, 35, 41, 0.08), 0 4px 8px rgba(47, 35, 41, 0.08), 0 18px 30px -12px rgba(47, 35, 41, 0.3);
+  --serif: 'Cormorant Garamond', 'Gowun Batang', Georgia, serif;
+  --sans: 'Manrope', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --nav-h: 64px;
+  /* papel con grano muy sutil */
+  --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .26 0 0 0 0 .3 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  font-size: 15.5px;
+  letter-spacing: 0.005em;
+  background-color: var(--cream);
+  background-image:
+    var(--paper),
+    radial-gradient(ellipse 80% 50% at 100% 0%, rgba(229, 195, 198, 0.35), transparent 70%),
+    radial-gradient(ellipse 70% 45% at 0% 100%, rgba(199, 187, 220, 0.28), transparent 70%);
+  background-attachment: fixed;
+  background-size: 160px 160px, auto, auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--burgundy);
+  letter-spacing: 0.005em;
+  line-height: 1.15;
+}
+h1 {
+  font-size: 2rem;
+}
+h2 {
+  font-size: 1.5rem;
+}
+h3 {
+  font-size: 1.2rem;
+}
+
+a {
+  color: var(--burgundy);
+  text-decoration-color: var(--gold-line);
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 2px;
+}
+
+.muted {
+  color: var(--muted);
+}
+.serif {
+  font-family: var(--serif);
+}
+
+/* etiqueta pequeña en versalitas, para encabezar secciones */
+.eyebrow {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+/* ---------- estructura ---------- */
+.topbar {
+  background: rgba(251, 246, 240, 0.82);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid var(--gold-line);
+  padding: calc(env(safe-area-inset-top) + 8px) 12px 8px 18px;
+}
+.topbar h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.page {
+  padding: 18px 18px 8px;
+}
+
+.bottomnav {
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 10px);
+  width: calc(100% - 24px);
+  max-width: 496px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 252, 249, 0.86);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 18px 40px -14px rgba(107, 39, 56, 0.35);
+  padding-bottom: 0;
+}
+.bottomnav a {
+  color: #a5949a;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  height: var(--nav-h);
+}
+.bottomnav a svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.6;
+}
+.bottomnav a.active {
+  color: var(--burgundy);
+}
+.bottomnav a.active .navdot {
+  background: var(--rose-soft);
+}
+.navdot {
+  padding: 4px 16px;
+}
+.app {
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 34px);
+}
+
+/* ---------- tarjetas ---------- */
+.card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+  backdrop-filter: blur(6px);
+}
+.card.soft {
+  background: linear-gradient(160deg, rgba(246, 242, 247, 0.95), rgba(255, 255, 255, 0.8));
+}
+.card.rose {
+  background: linear-gradient(150deg, #fffaf8 0%, var(--rose-soft) 100%);
+  border-color: rgba(181, 111, 124, 0.18);
+}
+.card.butter {
+  background: linear-gradient(150deg, #fffdf8 0%, var(--butter-soft) 100%);
+  border-color: var(--gold-line);
+}
+/* cinta: ahora una banda de papel translúcido con borde dorado */
+.tape::before {
+  width: 70px;
+  height: 16px;
+  top: -8px;
+  background: linear-gradient(90deg, rgba(232, 217, 189, 0.85), rgba(246, 232, 230, 0.85));
+  border: 1px solid rgba(180, 141, 85, 0.25);
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(47, 35, 41, 0.06);
+}
+
+/* ---------- botones ---------- */
+.btn {
+  min-height: 48px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8e3a50 0%, #6b2738 100%);
+  color: #fff8f5;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-size: 0.92rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 18px -8px rgba(107, 39, 56, 0.6);
+}
+.btn:hover {
+  filter: brightness(1.05);
+}
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--burgundy);
+  border: 1px solid rgba(107, 39, 56, 0.18);
+  box-shadow: none;
+}
+.btn.rose {
+  background: linear-gradient(180deg, #c98a96 0%, #b0687a 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 8px 18px -8px rgba(176, 104, 122, 0.6);
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--burgundy);
+  box-shadow: none;
+}
+.btn.danger {
+  background: linear-gradient(180deg, #b84862, #93304a);
+}
+.btn.sm {
+  min-height: 38px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+}
+.iconbtn {
+  color: var(--burgundy);
+}
+.iconbtn:hover {
+  background: var(--rose-soft);
+}
+.iconbtn svg {
+  stroke-width: 1.6;
+}
+.iconbtn.on {
+  color: var(--gold);
+}
+.fab {
+  background: linear-gradient(180deg, #8e3a50, #6b2738);
+  box-shadow: 0 14px 28px -10px rgba(107, 39, 56, 0.6);
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 28px);
+}
+
+/* ---------- formularios ---------- */
+.field input,
+.field select,
+.field textarea,
+.input,
+input[type='text'],
+input[type='password'],
+input[type='date'],
+input[type='search'],
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(107, 39, 56, 0.16);
+  border-radius: var(--radius-sm);
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.input:focus {
+  border-color: var(--rose-deep);
+  box-shadow: 0 0 0 4px rgba(229, 195, 198, 0.45);
+  outline: none;
+}
+.field > label,
+.field-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.check input {
+  accent-color: var(--burgundy);
+}
+
+/* ---------- pestañas: subrayado dorado, sin píldoras ---------- */
+.tabs {
+  gap: 4px;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 0;
+  margin-bottom: 16px;
+}
+.tab {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 10px 12px 12px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.86rem;
+  position: relative;
+  box-shadow: none;
+}
+.tab[aria-selected='true'] {
+  background: transparent;
+  color: var(--burgundy);
+  box-shadow: none;
+}
+.tab[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--rose-deep));
+}
+
+/* ---------- chips y etiquetas ---------- */
+.chip {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(107, 39, 56, 0.14);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 7px 14px;
+}
+.chip[aria-pressed='true'] {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  color: #fff8f5;
+}
+.tag {
+  background: var(--lavender-mist);
+  color: var(--burgundy);
+  font-weight: 700;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--hair);
+}
+.tag.rose {
+  background: var(--rose-soft);
+  color: var(--burgundy);
+}
+.tag.butter {
+  background: var(--butter-soft);
+  color: #7d5d2d;
+  border-color: var(--gold-line);
+}
+
+/* ---------- listas ---------- */
+.item {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--hair);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  padding: 12px 14px;
+}
+.item .title {
+  font-weight: 600;
+  color: var(--ink);
+}
+.section-title h2 {
+  font-size: 1.45rem;
+}
+.empty {
+  border: 1px dashed rgba(180, 141, 85, 0.35);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius);
+}
+.empty h3 {
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* ---------- hojas, avisos y barras ---------- */
+.backdrop {
+  background: rgba(47, 35, 41, 0.38);
+  backdrop-filter: blur(3px);
+}
+.sheet {
+  background: var(--cream);
+  background-image: var(--paper);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -20px 50px -20px rgba(47, 35, 41, 0.4);
+}
+.sheet .grab {
+  background: var(--gold-soft);
+}
+.toast {
+  background: rgba(47, 35, 41, 0.92);
+  color: #fbf6f0;
+  border-radius: 16px;
+  font-weight: 500;
+  box-shadow: 0 16px 30px -12px rgba(47, 35, 41, 0.5);
+  backdrop-filter: blur(8px);
+}
+.toast.error {
+  background: rgba(143, 38, 62, 0.95);
+}
+.bar {
+  background: var(--lavender-soft);
+  height: 6px;
+}
+.bar > i {
+  background: linear-gradient(90deg, var(--rose-deep), var(--burgundy));
+}
+.bar.rose > i {
+  background: linear-gradient(90deg, #e5c3c6, var(--rose-deep));
+}
+.bar.butter > i {
+  background: linear-gradient(90deg, var(--gold-soft), var(--gold));
+}
+.stars .on {
+  color: var(--gold);
+}
+.spinner {
+  border-color: var(--lavender-soft);
+  border-top-color: var(--burgundy);
+}
+.avatar {
+  background: var(--rose-soft);
+  color: var(--burgundy);
+  font-family: var(--serif);
+}
+.miniplayer {
+  border-radius: 20px;
+  border: 1px solid var(--hair);
+  box-shadow: var(--shadow);
+}
+
+/* ---------- marco de foto editorial (reutilizable) ---------- */
+.photo-frame {
+  position: relative;
+  background: #fffdf9;
+  padding: 8px 8px 30px;
+  border-radius: 4px;
+  box-shadow: var(--shadow-photo);
+}
+.photo-frame::after {
+  /* filete dorado interior */
+  content: '';
+  position: absolute;
+  inset: 4px 4px 26px;
+  border: 1px solid var(--gold-line);
+  pointer-events: none;
+}
+.photo-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn {
+  white-space: nowrap;
+}
+
+/* etiqueta de fecha (próximas fechas) */
+.date-badge {
+  flex-shrink: 0;
+  width: 46px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fffdf9;
+  border: 1px solid var(--gold-line);
+  box-shadow: 0 4px 10px -6px rgba(107, 39, 56, 0.35);
+  line-height: 1;
+}
+.date-badge b {
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--burgundy);
+}
+.date-badge i {
+  font-style: normal;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 3px;
+}
+.date-badge.k-nosotros,
+.date-badge.k-sorpresa {
+  background: linear-gradient(160deg, #fffaf8, var(--rose-soft));
+}
+.date-badge.k-tarea,
+.date-badge.k-objetivo {
+  background: linear-gradient(160deg, #fffdf9, var(--lavender-mist));
+}

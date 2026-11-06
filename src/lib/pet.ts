@@ -323,12 +323,12 @@ export function moodOf(stats: PetStats): { label: string; emoji: string } {
 // ---------- Minijuegos ----------
 export type GameId =
   | 'atrapar' | 'memoria' | 'luces' | 'quiz'
-  | 'ritmo' | 'coreo' | 'saltarin' | 'quien' | 'linea' | 'sopa' | 'cancion' | 'burbujas' | 'cafe' | 'vasos' | 'tateti';
+  | 'ritmo' | 'coreo' | 'saltarin' | 'quien' | 'linea' | 'sopa' | 'cancion' | 'burbujas' | 'cafe' | 'vasos' | 'tateti' | 'pesca' | 'laser';
 export const DAILY_GAME_HEART_CAP = 60;
 /** Cuántos puntos hacen falta por corazón en cada juego (máximo 15 corazones por partida). */
 const POINTS_PER_HEART: Record<GameId, number> = {
   atrapar: 3, memoria: 8, luces: 2, quiz: 7,
-  ritmo: 14, coreo: 8, saltarin: 6, quien: 6, linea: 7, sopa: 8, cancion: 6, burbujas: 4, cafe: 6, vasos: 4, tateti: 2,
+  ritmo: 14, coreo: 8, saltarin: 6, quien: 6, linea: 7, sopa: 8, cancion: 6, burbujas: 4, cafe: 6, vasos: 4, tateti: 2, pesca: 3, laser: 3,
 };
 
 export interface GameReward {

@@ -1,9 +1,9 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { IconBack, IconCat, IconGear, IconHeart, IconHome, IconLock, IconMusic, IconTv } from './icons';
-import { Blossom } from './deco';
 import { lockVault } from '../lib/vault';
 import { useEffect } from 'react';
 import { MiniPlayer } from './MiniPlayer';
+import { Watchers } from './Watchers';
 
 const TITLES: Record<string, string> = {
   '/': 'Seoulmate',
@@ -14,6 +14,8 @@ const TITLES: Record<string, string> = {
   '/diario': 'Mi diario',
   '/historias': 'Biblioteca BL',
   '/ajustes': 'Ajustes',
+  '/noticias': 'Noticias BTS',
+  '/fechas': 'Próximas fechas',
 };
 
 const NAV = [
@@ -40,7 +42,6 @@ export function Layout() {
           </button>
         )}
         <h1>
-          {pathname === '/' && <Blossom size={22} />}
           {TITLES[pathname] ?? 'Seoulmate'}
         </h1>
         <NavLink to="/ajustes" className="iconbtn" aria-label="Ajustes">
@@ -54,6 +55,7 @@ export function Layout() {
         <Outlet />
       </main>
       <MiniPlayer />
+      <Watchers />
       <nav className="bottomnav" aria-label="Secciones">
         {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => (isActive ? 'active' : '')}>

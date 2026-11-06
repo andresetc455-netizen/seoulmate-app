@@ -97,11 +97,11 @@ test('Cat Café: adoptar, acciones con efecto real, tienda, misiones y progreso 
   const love = page.getByTestId('stat-Cariño');
   const hearts = page.getByTestId('hearts');
   await expect(energy).toHaveText('70');
-  await expect(hearts).toHaveText('20 💗');
+  await expect(hearts).toHaveText('20 ♥');
 
   await page.getByRole('button', { name: /Alimentar/ }).click();
   await expect(energy).toHaveText('95');
-  await expect(hearts).toHaveText('22 💗');
+  await expect(hearts).toHaveText('22 ♥');
   await expect(page.getByTestId('cat-speech')).toContainText('Ñam');
   // Repetir enseguida no hace efecto (espera visible)
   await page.getByRole('button', { name: /Alimentar/ }).click();
@@ -128,8 +128,8 @@ test('Cat Café: adoptar, acciones con efecto real, tienda, misiones y progreso 
   await page.getByRole('tab', { name: 'Tienda y decoración' }).click();
   await page.getByTestId('item-corona-estrellas').getByRole('button').isDisabled();
   await expect(page.getByTestId('item-corona-estrellas').getByRole('button')).toHaveText('Nivel 3');
-  await page.getByTestId('item-planta').getByRole('button', { name: '12 💗' }).click();
-  await expect(hearts).toHaveText(`${heartsNow - 12} 💗`);
+  await page.getByTestId('item-planta').getByRole('button', { name: '12 ♥' }).click();
+  await expect(hearts).toHaveText(`${heartsNow - 12} ♥`);
   await page.getByTestId('item-planta').getByRole('button', { name: 'Colocar' }).click();
   await expect(page.getByTestId('room').locator('[title="planta"]')).toBeVisible();
   await page.getByTestId('item-pared-crema').getByRole('button', { name: 'Usar' }).click();
@@ -144,7 +144,7 @@ test('Cat Café: adoptar, acciones con efecto real, tienda, misiones y progreso 
   await expect(page.getByTestId('stat-Cariño')).toHaveText('31');
   await expect(page.getByTestId('room').locator('[title="planta"]')).toBeVisible();
   // la recompensa diaria de visita se suma una sola vez (+10)
-  await expect(page.getByTestId('hearts')).toHaveText(`${heartsNow - 12 + 10} 💗`);
+  await expect(page.getByTestId('hearts')).toHaveText(`${heartsNow - 12 + 10} ♥`);
 });
 
 test('BTS World: validación, canciones, favoritos, integrantes, photocards y listas', async ({ page }) => {
@@ -379,7 +379,7 @@ test('Diario personal: crear, consultar, editar, eliminar; tareas con recompensa
   await page.getByLabel('Nueva tarea').fill('Estudiar coreano');
   await page.getByRole('button', { name: 'Agregar' }).click();
   await page.getByLabel('Completar: Estudiar coreano').check();
-  await expect(page.getByText('+5 💗 para Bori')).toBeVisible();
+  await expect(page.getByText('+5 corazones para Bori')).toBeVisible();
   await page.getByLabel('Completar: Estudiar coreano').uncheck();
   await page.getByLabel('Completar: Estudiar coreano').check();
   await expect(page.getByText('Hechas (1)')).toBeVisible();
@@ -449,7 +449,7 @@ test('Paquete del capítulo: se exporta cifrado, sin el diario, y se importa en 
   await expect(her.getByText('Contraseña incorrecta o archivo dañado.')).toBeVisible();
   await her.getByLabel(/Contraseña del archivo/).last().fill('codigo-regalo');
   await her.getByRole('button', { name: 'Importar' }).click();
-  await expect(her.getByText('Capítulo importado y combinado 💌')).toBeVisible();
+  await expect(her.getByText('Capítulo importado y combinado')).toBeVisible();
   await her.getByRole('navigation', { name: 'Secciones' }).getByRole('link', { name: 'Nosotros' }).click();
   await her.getByRole('tab', { name: 'Cartas' }).click();
   await expect(her.getByTestId('letter')).toContainText('Carta viajera');

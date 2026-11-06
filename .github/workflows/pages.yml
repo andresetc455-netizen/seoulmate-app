@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '17 */3 * * *' # actualiza las noticias de BTS cada 3 horas
 permissions:
   contents: read
   pages: write
@@ -22,6 +24,11 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - name: Noticias de BTS
+        run: node scripts/fetch-news.mjs dist/news.json
+        continue-on-error: true
+        env:
+          PREVIOUS_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/news.json
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

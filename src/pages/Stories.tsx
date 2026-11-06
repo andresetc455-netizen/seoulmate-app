@@ -23,7 +23,7 @@ export function StoriesPage() {
     <div className="page">
       <section className="card stories-hero">
         <div>
-          <h2 style={{ margin: 0 }}>Mi biblioteca BL 📚</h2>
+          <h2 style={{ margin: 0 }}>Mi biblioteca BL</h2>
           <p className="small" style={{ margin: '4px 0 0' }}>
             {stories.length === 0 ? 'Guardá tus historias favoritas para no perderlas nunca.' : `${stories.length} historias · ${reading} leyendo ahora`}
           </p>
@@ -81,7 +81,7 @@ function StoryCard({ s, onEdit }: { s: Story; onEdit: () => void }) {
     const chapter = Math.max(0, s.chapters ? Math.min(s.chapters, s.chapter + d) : s.chapter + d);
     const status: StoryStatus = s.chapters && chapter >= s.chapters ? 'terminada' : chapter > 0 && s.status === 'quiero' ? 'leyendo' : s.status;
     void save({ ...s, chapter, status });
-    if (status === 'terminada' && s.status !== 'terminada') toast(`¡Terminaste "${s.title}"! 🎉`);
+    if (status === 'terminada' && s.status !== 'terminada') toast(`¡Terminaste "${s.title}"!`);
   };
   const pct = s.chapters ? Math.round((Math.min(s.chapter, s.chapters) / s.chapters) * 100) : 0;
   return (
@@ -176,7 +176,7 @@ function StoryForm({ story, onClose }: { story: Story | null; onClose: () => voi
       ship: f.values.ship.trim(),
       link: f.values.link.trim() ? (safeLink(f.values.link) ?? '') : '',
     });
-    toast(story ? 'Historia actualizada' : 'Historia guardada 📚');
+    toast(story ? 'Historia actualizada' : 'Historia guardada');
     onClose();
   };
   const num = (v: string) => (v === '' ? 0 : Math.max(0, Math.floor(Number(v))));
@@ -231,7 +231,7 @@ function StoryForm({ story, onClose }: { story: Story | null; onClose: () => voi
           <Stars value={f.values.rating} onChange={f.set('rating')} />
         </div>
         <label className="check">
-          <input type="checkbox" checked={f.values.favorite} onChange={(e) => f.set('favorite')(e.target.checked)} /> Favorita 💜
+          <input type="checkbox" checked={f.values.favorite} onChange={(e) => f.set('favorite')(e.target.checked)} /> Favorita
         </label>
         <Field label="Notas (opcional)" error={f.errors.notes} help="Escenas favoritas, por qué te gustó, a quién se la recomendarías…">
           <textarea value={f.values.notes} onChange={(e) => f.set('notes')(e.target.value)} />

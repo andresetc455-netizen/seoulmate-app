@@ -47,6 +47,18 @@ La instalación como app y el modo sin conexión **requieren https** (o `localho
 | Nuestro capítulo | Contador configurable, línea de tiempo con fotos, álbum de fotos, cartas (con fecha de apertura), sorpresas que se desbloquean en una fecha, mensajes para cada ocasión, planes de citas (10 ideas genéricas inspiradas en situaciones típicas de K-dramas + propias), botón "Carta sorpresa". Todo el contenido personal empieza vacío. |
 | Mi diario | Diario con estado de ánimo y búsqueda, tareas con fecha, objetivos con progreso. Crear, editar, eliminar y consultar. Documento separado del contenido romántico. |
 
+## Novedades (noviembre 2026)
+
+| Función | Detalle |
+| --- | --- |
+| Noticias BTS | Página `/noticias` y tarjeta en Inicio con giras, eventos, música, récords y servicio militar, filtrables por tema e integrante. GitHub Actions (`pages.yml`) corre `scripts/fetch-news.mjs` cada 3 horas: junta titulares de Google News y portales de K-pop por RSS y publica `news.json` junto a la app. Si todas las fuentes fallan, conserva el anterior. |
+| Avisos y fechas | Página `/fechas`: cumpleaños de los 7, aniversario del debut, Día de ARMY, aniversario y mesiversario, cartas/sorpresas (texto genérico), tareas y objetivos. Botón 📅 para agregarlas al calendario del teléfono (.ics, aviso a las 9:00 aunque la app esté cerrada). Avisos del sistema al abrir la app; en Android con la app instalada, las noticias también llegan en segundo plano (Periodic Background Sync, si el navegador lo permite). |
+| Contenido real | Discografía principal (20 lanzamientos y canciones principales) importable con un botón; nombre real, cumpleaños y discografía solista de cada integrante. |
+| Galería libre | Pestaña "Galería ♥" en BTS World: fotos reales con licencia libre de Wikimedia Commons por integrante, favoritas y "Crear photocard" (se guarda cifrada y con autoría). |
+| Juegos del gatito | "Pesca del día" (timing) y "Puntero láser" (3 vidas). |
+
+> No verificado en este entorno (sin acceso a internet externo): la respuesta real de los feeds RSS y de Wikimedia Commons. La lógica está cubierta con pruebas y datos simulados; revisá la página de noticias después del primer despliegue programado.
+
 ## Privacidad y seguridad
 
 - **Cifrado local:** todos los datos (incluidas las fotos) se guardan en IndexedDB cifrados con AES-GCM 256. La clave se deriva de la contraseña con PBKDF2-SHA256 (310.000 iteraciones) y solo vive en memoria mientras la app está desbloqueada.

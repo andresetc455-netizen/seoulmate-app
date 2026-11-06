@@ -8,6 +8,10 @@ export const settingsDoc = createDoc<Settings>('settings', () => ({
   authorPin: null,
   customPhrases: [],
   onboarded: false,
+  notify: false,
+  notified: [],
+  newsSeenAt: 0,
+  newsNotifiedAt: 0,
 }));
 
 export const petDoc = createDoc('pet', () => initialPet());
@@ -22,6 +26,7 @@ export const btsDoc = createDoc<BtsData>('bts', () => ({
   photocards: [],
   memories: [],
   lists: [],
+  gallery: [],
 }));
 
 export const dramaDoc = createDoc<DramaData>('dramas', () => ({ dramas: [] }));

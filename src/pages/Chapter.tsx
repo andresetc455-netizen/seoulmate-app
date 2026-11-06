@@ -93,7 +93,7 @@ function AuthorBar() {
   if (author)
     return (
       <div className="author-bar on" role="status">
-        <span>✍️ Modo autor: podés agregar y editar el contenido.</span>
+        <span>Modo autor: podés agregar y editar el contenido.</span>
         <button className="btn sm secondary" onClick={() => setAuthorMode(false)}>
           Salir
         </button>
@@ -139,7 +139,7 @@ function Counter({ author }: { author: boolean }) {
     if (date > todayKey()) return setErr('La fecha no puede ser futura.');
     await upd((c) => ({ ...c, togetherSince: date }));
     setErr('');
-    toast('Fecha guardada 💜');
+    toast('Fecha guardada');
   };
   return (
     <div>
@@ -447,7 +447,7 @@ function LetterForm({ letter, onClose }: { letter: Letter | null; onClose: () =>
         unlockDate: f.values.unlockDate || null,
       }),
     }));
-    toast('Carta guardada 💌');
+    toast('Carta guardada');
     onClose();
   };
   return (
@@ -497,7 +497,7 @@ function Surprises({ author }: { author: boolean }) {
         </button>
       )}
       {sorted.length === 0 ? (
-        <Empty title="No hay sorpresas programadas" text={author ? 'Programá una sorpresa para una fecha especial.' : 'Quién sabe qué aparecerá aquí… 👀'} />
+        <Empty title="No hay sorpresas programadas" text={author ? 'Programá una sorpresa para una fecha especial.' : 'Quién sabe qué aparecerá aquí…'} />
       ) : (
         <div className="grid2">
           {sorted.map((s) => {
@@ -560,7 +560,7 @@ function SurpriseForm({ s, onClose }: { s: Surprise | null; onClose: () => void 
       ...c,
       surprises: upsert(c.surprises, { id: s?.id ?? newId(), openedAt: s?.openedAt ?? null, ...f.values, title: f.values.title.trim() }),
     }));
-    toast('Sorpresa programada 🎁');
+    toast('Sorpresa programada');
     onClose();
   };
   return (
@@ -710,7 +710,7 @@ const PLAN_IDEAS: Array<Pick<DatePlan, 'title' | 'inspiration' | 'description'>>
   { title: 'Deseo de primera lluvia o frío', inspiration: 'La primera nevada', description: 'Pedir un deseo juntos el primer día frío o de lluvia de la temporada.' },
 ];
 
-const PLAN_STATUS: Record<PlanStatus, string> = { idea: 'Idea', planeada: 'Planeada', hecha: 'Hecha 💜' };
+const PLAN_STATUS: Record<PlanStatus, string> = { idea: 'Idea', planeada: 'Planeada', hecha: 'Hecha' };
 
 function Plans() {
   const { plans } = useDoc(chapterDoc);

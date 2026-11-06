@@ -56,7 +56,7 @@ export function DramasPage() {
         onChange={setTab}
         tabs={[
           { id: 'lista', label: 'Mis dramas' },
-          { id: 'romance', label: 'Romance 💜' },
+          { id: 'romance', label: 'Romance' },
           { id: 'ruleta', label: 'Ruleta' },
           { id: 'recomendaciones', label: 'Mis recomendaciones' },
         ]}
@@ -249,7 +249,7 @@ function DramaDetail({ drama, onClose, onEdit }: { drama: Drama; onClose: () => 
       )}
       {drama.recommend && (
         <div className="card rose">
-          <strong className="small">💌 La recomiendo</strong>
+          <strong className="small">La recomiendo</strong>
           {drama.recommendNote && <p className="small pre" style={{ margin: 0 }}>{drama.recommendNote}</p>}
         </div>
       )}
@@ -326,7 +326,7 @@ function DramaForm({ drama, defaultRecommend, onClose }: { drama: Drama | null; 
       title: f.values.title.trim(),
       watchLink: f.values.watchLink.trim(),
     });
-    toast(drama ? 'Drama actualizado' : 'Drama agregado 🎬');
+    toast(drama ? 'Drama actualizado' : 'Drama agregado');
     onClose();
   };
   return (

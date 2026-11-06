@@ -18,6 +18,8 @@ import { ChapterPage } from './pages/Chapter';
 import { PersonalPage } from './pages/Personal';
 import { SettingsPage } from './pages/Settings';
 import { StoriesPage } from './pages/Stories';
+import { NewsPage } from './pages/News';
+import { DatesPage } from './pages/Dates';
 
 type Phase = 'loading' | 'setup' | 'locked' | 'unlocked' | 'error';
 
@@ -84,6 +86,8 @@ export function App() {
           <Route path="diario" element={<PersonalPage />} />
           <Route path="historias" element={<StoriesPage />} />
           <Route path="ajustes" element={<SettingsPage />} />
+          <Route path="noticias" element={<NewsPage />} />
+          <Route path="fechas" element={<DatesPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

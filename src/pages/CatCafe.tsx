@@ -38,7 +38,7 @@ function Adoption() {
     e.preventDefault();
     try {
       await petDoc.update((p) => adopt(p, name, breed));
-      toast(`¡Bienvenido/a, ${name.trim()}! 🐾`);
+      toast(`¡Bienvenido/a, ${name.trim()}!`);
     } catch (err) {
       setError(errorMessage(err));
     }
@@ -105,7 +105,7 @@ function CafeRoom({ pet, now }: { pet: PetState; now: number }) {
     const { state, outcome } = applyAction(petDoc.get(), action);
     if (outcome.ok) await petDoc.replace(state);
     setMood(outcome.reaction);
-    setSpeech(outcome.heartsEarned ? `${outcome.message} +${outcome.heartsEarned} 💗` : outcome.message);
+    setSpeech(outcome.heartsEarned ? `${outcome.message} +${outcome.heartsEarned} ♥` : outcome.message);
     if (outcome.ok) {
       const ps = PARTICLES[action].map((char, i) => ({ id: ++seq.current, char, left: 38 + i * 10 + Math.random() * 6 }));
       setParticles((p) => [...p, ...ps]);
@@ -125,7 +125,7 @@ function CafeRoom({ pet, now }: { pet: PetState; now: number }) {
           </span>
         </div>
         <span className="tag butter" style={{ fontSize: '0.95rem', padding: '6px 12px' }} data-testid="hearts">
-          {pet.hearts} 💗
+          {pet.hearts} ♥
         </span>
       </div>
       <Room pet={pet} mood={mood === 'idle' ? restingMood : mood} speech={speech} particles={particles} onCatClick={() => act('pet')} />
@@ -145,7 +145,7 @@ function CafeRoom({ pet, now }: { pet: PetState; now: number }) {
         onChange={setTab}
         tabs={[
           { id: 'acciones', label: 'Mimos' },
-          { id: 'juegos', label: 'Juegos 🎮' },
+          { id: 'juegos', label: 'Juegos' },
           { id: 'tienda', label: 'Tienda y decoración' },
           { id: 'misiones', label: 'Recompensas' },
         ]}
@@ -243,7 +243,7 @@ function Shop({ pet }: { pet: PetState }) {
                     </button>
                   ) : (
                     <button className="btn sm block rose" onClick={() => buy(item.id)} style={{ marginTop: 6 }} disabled={locked}>
-                      {locked ? `Nivel ${item.minLevel}` : `${item.cost} 💗`}
+                      {locked ? `Nivel ${item.minLevel}` : `${item.cost} ♥`}
                     </button>
                   )}
                 </div>
@@ -263,7 +263,7 @@ function Missions({ pet }: { pet: PetState }) {
   const claim = async (id: (typeof MISSIONS)[number]['id']) => {
     try {
       await petDoc.update((p) => claimMission(p, id, ctx));
-      toast('¡Recompensa recibida! 💗');
+      toast('¡Recompensa recibida!');
     } catch (e) {
       toast(errorMessage(e), 'error');
     }
@@ -280,11 +280,11 @@ function Missions({ pet }: { pet: PetState }) {
         return (
           <div className="item" key={mi.id} style={{ alignItems: 'center' }}>
             <span style={{ fontSize: 22 }} aria-hidden="true">
-              {claimed ? '✅' : done ? '🎁' : '⬜'}
+              {claimed ? '✓' : done ? '★' : '○'}
             </span>
             <div className="grow">
               <div className="title">{mi.label}</div>
-              <div className="tiny muted">+{mi.reward} 💗</div>
+              <div className="tiny muted">+{mi.reward} ♥</div>
             </div>
             <button className="btn sm" disabled={!done || claimed} onClick={() => claim(mi.id)}>
               {claimed ? 'Hecho' : 'Reclamar'}
