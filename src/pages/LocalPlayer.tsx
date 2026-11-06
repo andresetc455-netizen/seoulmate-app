@@ -138,7 +138,7 @@ export function localSource(file: File, sub?: File): PlaySource {
   };
 }
 
-export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onClose }: { dramaId: string; dramaTitle: string; source: PlaySource; hasNext: boolean; onNext: () => void; onClose: () => void }) {
+export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onClose, fallback }: { dramaId: string; dramaTitle: string; source: PlaySource; hasNext: boolean; onNext: () => void; onClose: () => void; fallback?: React.ReactNode }) {
   const video = useRef<HTMLVideoElement>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [vtt, setVtt] = useState<string | null>(null);
@@ -218,7 +218,9 @@ export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onC
           </button>
         )}
       </header>
-      {error ? (
+      {error && fallback ? (
+        fallback
+      ) : error ? (
         <div className="video-error">
           <p>{error}</p>
           <p className="small">Si el formato no es compatible, convertilo a MP4 (H.264).</p>

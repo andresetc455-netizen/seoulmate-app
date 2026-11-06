@@ -4,13 +4,80 @@ import { Link } from 'react-router-dom';
 import { useDoc, newId, upsert } from '../lib/store';
 import { dramaDoc, settingsDoc } from '../lib/docs';
 import { clock, isDone } from '../lib/episodes';
-import { loadLibrary, NotSignedIn, resumeLogin, signIn, signOut, streamUrl, subtitleText, type CloudEpisode, type CloudShow } from '../lib/onedrive';
+import * as od from '../lib/onedrive';
+import * as gd from '../lib/drive';
+import type { CloudEpisode, CloudShow } from '../lib/onedrive';
 import type { Drama } from '../lib/types';
 import { cloudConfig } from '../lib/cloudConfig';
 import { Empty, toast } from '../components/ui';
 import { VideoOverlay, type PlaySource } from './LocalPlayer';
 
-const key = (ep: CloudEpisode) => `od:${ep.id}`;
+/** Misma pantalla para OneDrive y Google Drive: cada servicio aporta cómo entrar, leer y reproducir. */
+interface Provider {
+  label: string;
+  resume(): Promise<boolean>;
+  signIn(): Promise<boolean>;
+  signOut(): Promise<void>;
+  load(): Promise<CloudShow[]>;
+  source(ep: CloudEpisode): PlaySource;
+  fallback?(ep: CloudEpisode): React.ReactNode;
+}
+
+function googleProvider(clientId: string, folder: string): Provider {
+  const tok = async () => gd.currentToken() ?? (await gd.connectDrive(clientId, true));
+  return {
+    label: 'Google',
+    resume: async () => !!gd.currentToken(),
+    signIn: async () => !!(await gd.connectDrive(clientId)),
+    signOut: async () => gd.forgetToken(),
+    load: async () => {
+      const id = gd.folderIdFrom(folder);
+      if (!id) throw new Error('El enlace de la carpeta de Drive no es válido.');
+      const t = gd.currentToken();
+      if (!t) throw new od.NotSignedIn();
+      try {
+        return await gd.loadLibrary(t, id);
+      } catch (e) {
+        if (e instanceof gd.DriveAuthError) throw new od.NotSignedIn();
+        throw e;
+      }
+    },
+    source: (ep) => ({
+      key: `gd:${ep.id}`,
+      name: ep.name,
+      ep: ep.ep,
+      url: async () => gd.mediaUrl(ep.id, await tok()),
+      subtitles: ep.subId ? async () => gd.subtitleText(ep.subId!, await tok()) : undefined,
+    }),
+    // Si el teléfono no puede con el formato, se usa el reproductor de Drive (convierte el video).
+    fallback: (ep) => (
+      <div className="drive-frame">
+        <iframe src={gd.previewUrl(ep.id)} title={ep.name} allow="autoplay; fullscreen" allowFullScreen />
+        <a className="btn sm secondary" href={gd.viewUrl(ep.id)} target="_blank" rel="noreferrer">
+          Abrir en Google Drive
+        </a>
+      </div>
+    ),
+  };
+}
+
+function oneDriveProvider(clientId: string, folder: string): Provider {
+  return {
+    label: 'Microsoft',
+    resume: async () => !!(await od.resumeLogin(clientId)),
+    signIn: async () => !!(await od.signIn(clientId)),
+    signOut: () => od.signOut(clientId),
+    load: () => od.loadLibrary(clientId, folder),
+    source: (ep) => ({
+      key: `od:${ep.id}`,
+      name: ep.name,
+      ep: ep.ep,
+      url: () => od.streamUrl(clientId, ep),
+      subtitles: ep.subId ? () => od.subtitleText(clientId, ep) : undefined,
+    }),
+  };
+}
+
 
 /** Busca el drama por nombre o lo crea, para guardar ahí el progreso. */
 async function ensureDrama(title: string): Promise<string> {
@@ -37,21 +104,23 @@ export function CloudShows() {
   const [playing, setPlaying] = useState<{ show: CloudShow; index: number; dramaId: string } | null>(null);
 
   const configured = !!clientId && !!folder;
+  const provider = useMemo(() => (gd.isValidClientId(clientId) ? googleProvider(clientId, folder) : oneDriveProvider(clientId, folder)), [clientId, folder]);
 
   useEffect(() => {
     if (!configured) return;
-    resumeLogin(clientId)
-      .then((acc) => setSigned(!!acc))
+    provider
+      .resume()
+      .then(setSigned)
       .catch(() => setSigned(false));
-  }, [clientId, configured]);
+  }, [provider, configured]);
 
   const load = async () => {
     setLoading(true);
     setError('');
     try {
-      setShows(await loadLibrary(clientId, folder));
+      setShows(await provider.load());
     } catch (e) {
-      if (e instanceof NotSignedIn) setSigned(false);
+      if (e instanceof od.NotSignedIn) setSigned(false);
       setError(e instanceof Error ? e.message : 'No se pudo leer la carpeta.');
     } finally {
       setLoading(false);
@@ -65,7 +134,7 @@ export function CloudShows() {
 
   const progressOf = (ep: CloudEpisode) => {
     for (const d of dramas) {
-      const p = d.watched?.find((w) => w.key === key(ep));
+      const p = d.watched?.find((w) => w.key === provider.source(ep).key);
       if (p) return p;
     }
     return undefined;
@@ -80,13 +149,13 @@ export function CloudShows() {
         <span className="eyebrow">En la nube</span>
         <h3>Tus capítulos, en cualquier lugar</h3>
         <p className="small muted">
-          Se abren en OneDrive y se reproducen en streaming, sin descargarlos. La primera vez entrá con tu cuenta de Microsoft (la del correo con el que te compartieron la carpeta).
+          Se abren en {gd.isDriveLink(folder) ? 'Google Drive' : 'OneDrive'} y se reproducen en streaming, sin descargarlos. La primera vez entrá con la cuenta del correo con el que te compartieron la carpeta.
         </p>
         <a className="btn" href={folder} target="_blank" rel="noreferrer">
-          Ver capítulos en OneDrive
+          Ver capítulos en {gd.isDriveLink(folder) ? 'Google Drive' : 'OneDrive'}
         </a>
         <p className="tiny muted" style={{ marginTop: 12 }}>
-          Consejo: con la app OneDrive instalada en el teléfono se ve mejor y recuerda por dónde ibas.
+          Consejo: con la app instalada en el teléfono se ve mejor y recuerda por dónde ibas.
         </p>
       </div>
     );
@@ -95,7 +164,7 @@ export function CloudShows() {
     return (
       <Empty
         title="Todavía no hay una carpeta conectada"
-        text="Quien preparó Seoulmate tiene que pegar la carpeta de OneDrive en Ajustes → En la nube. Después vas a ver acá los capítulos para mirarlos sin descargarlos."
+        text="Quien preparó Seoulmate tiene que pegar la carpeta (OneDrive o Google Drive) en Ajustes → En la nube. Después vas a ver acá los capítulos para mirarlos sin descargarlos."
         action={<Link className="btn sm secondary" to="/ajustes">Ir a Ajustes</Link>}
       />
     );
@@ -105,19 +174,18 @@ export function CloudShows() {
       <div className="card center cloud-hero">
         <span className="eyebrow">En la nube</span>
         <h3>Tus capítulos, en cualquier lugar</h3>
-        <p className="small muted">Entrá con tu cuenta de Microsoft para ver los dramas que te compartieron. Solo se pide permiso de lectura.</p>
+        <p className="small muted">Entrá con tu cuenta de {provider.label} para ver los dramas que te compartieron. Solo se pide permiso de lectura.</p>
         <button
           className="btn"
           onClick={async () => {
             try {
-              const acc = await signIn(clientId);
-              if (acc) setSigned(true);
+              if (await provider.signIn()) setSigned(true);
             } catch (e) {
               toast(e instanceof Error ? e.message : 'No se pudo iniciar sesión.', 'error');
             }
           }}
         >
-          Entrar con Microsoft
+          Entrar con {provider.label}
         </button>
         {error && <p className="small" role="alert" style={{ marginTop: 10 }}>{error}</p>}
       </div>
@@ -134,7 +202,7 @@ export function CloudShows() {
           <button
             className="btn ghost sm"
             onClick={async () => {
-              await signOut(clientId);
+              await provider.signOut();
               setShows(null);
               setSigned(false);
             }}
@@ -182,17 +250,14 @@ export function CloudShows() {
           </section>
         );
       })}
-      {playing && <CloudOverlay clientId={clientId} {...playing} onIndex={(i) => setPlaying(i === null ? null : { ...playing, index: i })} />}
+      {playing && <CloudOverlay provider={provider} {...playing} onIndex={(i) => setPlaying(i === null ? null : { ...playing, index: i })} />}
     </div>
   );
 }
 
-function CloudOverlay({ clientId, show, index, dramaId, onIndex }: { clientId: string; show: CloudShow; index: number; dramaId: string; onIndex: (i: number | null) => void }) {
+function CloudOverlay({ provider, show, index, dramaId, onIndex }: { provider: Provider; show: CloudShow; index: number; dramaId: string; onIndex: (i: number | null) => void }) {
   const ep = show.episodes[index];
-  const source: PlaySource = useMemo(
-    () => ({ key: key(ep), name: ep.name, ep: ep.ep, url: () => streamUrl(clientId, ep), subtitles: ep.subId ? () => subtitleText(clientId, ep) : undefined }),
-    [clientId, ep],
-  );
+  const source = useMemo(() => provider.source(ep), [provider, ep]);
   return (
     <VideoOverlay
       key={source.key}
@@ -202,6 +267,7 @@ function CloudOverlay({ clientId, show, index, dramaId, onIndex }: { clientId: s
       hasNext={index < show.episodes.length - 1}
       onNext={() => onIndex(index + 1)}
       onClose={() => onIndex(null)}
+      fallback={provider.fallback?.(ep)}
     />
   );
 }

@@ -455,9 +455,10 @@ function CloudSettings() {
   const save = async (e: FormEvent) => {
     e.preventDefault();
     const { isValidClientId, isShareLink, rememberClientId } = await import('../lib/onedrive');
+    const gd = await import('../lib/drive');
     const errs: { client?: string; folder?: string } = {};
-    if (client.trim() && !isValidClientId(client)) errs.client = 'Pegá el "Application (client) ID" (formato 1234abcd-…).';
-    if (folder.trim() && !isShareLink(folder)) errs.folder = 'Pegá el enlace de la carpeta de OneDrive (empieza con https://1drv.ms/ o https://onedrive.live.com/).';
+    if (client.trim() && !isValidClientId(client) && !gd.isValidClientId(client)) errs.client = 'Pegá el ID de la app: el de Microsoft (1234abcd-…) o el de Google (…apps.googleusercontent.com).';
+    if (folder.trim() && !isShareLink(folder) && !gd.isDriveLink(folder)) errs.folder = 'Pegá el enlace de la carpeta de OneDrive o de Google Drive.';
     setErr(errs);
     if (errs.client || errs.folder) return;
     await settingsDoc.update((x) => ({ ...x, cloudClientId: client.trim(), cloudFolder: folder.trim() }));
@@ -467,17 +468,17 @@ function CloudSettings() {
   return (
     <section className="card">
       <span className="eyebrow">K-Drama Diary</span>
-      <h2>En la nube (OneDrive)</h2>
+      <h2>En la nube</h2>
       <p className="small muted">
-        Capítulos guardados en una carpeta de OneDrive compartida con su cuenta de Microsoft. Solo se puede ver esa carpeta, nunca el resto del OneDrive.
+        Capítulos guardados en una carpeta de OneDrive o Google Drive compartida con su cuenta. Solo se puede ver esa carpeta, nunca el resto.
         {(DEFAULT_CLOUD_CLIENT_ID || DEFAULT_CLOUD_FOLDER) && ' Ya viene configurado: completá estos campos solo si querés cambiarlo.'}
       </p>
       <form onSubmit={save} noValidate>
-        <Field label="ID de la app de Microsoft" error={err.client}>
-          <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="1234abcd-…" autoComplete="off" spellCheck={false} />
+        <Field label="ID de la app (Microsoft o Google)" error={err.client}>
+          <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="…apps.googleusercontent.com" autoComplete="off" spellCheck={false} />
         </Field>
         <Field label="Enlace de la carpeta compartida" error={err.folder}>
-          <input value={folder} onChange={(e) => setFolder(e.target.value)} inputMode="url" placeholder="https://1drv.ms/f/…" autoComplete="off" spellCheck={false} />
+          <input value={folder} onChange={(e) => setFolder(e.target.value)} inputMode="url" placeholder="https://drive.google.com/drive/folders/…" autoComplete="off" spellCheck={false} />
         </Field>
         <button className="btn sm">Guardar</button>
       </form>
