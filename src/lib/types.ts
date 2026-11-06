@@ -114,8 +114,17 @@ export interface Drama {
   recommend: boolean;
   recommendNote: string;
   watchLink?: string; // dónde verlo: YouTube (se reproduce en la app) u otra plataforma (se abre afuera)
+  watched?: WatchProgress[]; // capítulos vistos desde archivos del teléfono
   createdAt: number;
   updatedAt: number;
+}
+export interface WatchProgress {
+  key: string; // nombre|tamaño del archivo
+  name: string;
+  ep: number | null;
+  time: number; // segundos
+  duration: number;
+  at: number;
 }
 export interface DramaData {
   dramas: Drama[];

@@ -62,3 +62,80 @@
   z-index: 2;
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
 }
+
+/* ---------- capítulos del teléfono ---------- */
+.local-eps {
+  margin-bottom: 12px;
+}
+.local-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.local-ep {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  align-items: center;
+  margin: 0;
+}
+.local-ep .title {
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ep-num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--burgundy);
+  background: #fffdf9;
+  border: 1px solid var(--gold-line);
+}
+.video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #120c10;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.video-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(env(safe-area-inset-top) + 8px) 12px 8px;
+  color: #fbf1ec;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent);
+}
+.video-name {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.video-overlay video {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  background: #000;
+}
+.video-error {
+  flex: 1;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: #fbf1ec;
+  padding: 24px;
+}

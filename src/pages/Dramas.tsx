@@ -9,6 +9,7 @@ import { IconDice } from '../components/icons';
 import { isYouTubeLink } from '../lib/youtube';
 import { playQueue } from '../lib/player';
 import { isInList, pickToDrama, ROMANCE_PICKS, whereToWatch } from '../lib/romance';
+import { LocalEpisodes } from './LocalPlayer';
 import './dramas.css';
 
 function safeHttpsUrl(v: string | undefined): URL | null {
@@ -210,6 +211,7 @@ function DramaDetail({ drama, onClose, onEdit }: { drama: Drama; onClose: () => 
           <WatchButton drama={drama} />
         </div>
       )}
+      <LocalEpisodes drama={drama} />
       <Stars value={drama.rating} onChange={(v) => save({ ...drama, rating: v })} label="Mi puntuación" />
       {drama.genres.length > 0 && (
         <p>
