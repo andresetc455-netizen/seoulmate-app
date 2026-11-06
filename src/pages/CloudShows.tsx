@@ -73,6 +73,24 @@ export function CloudShows() {
 
   const play = async (show: CloudShow, index: number) => setPlaying({ show, index, dramaId: await ensureDrama(show.name) });
 
+  // Sin app registrada en Microsoft: se abre la carpeta compartida directamente en OneDrive.
+  if (folder && !clientId)
+    return (
+      <div className="card center cloud-hero" data-testid="cloud-open">
+        <span className="eyebrow">En la nube</span>
+        <h3>Tus capítulos, en cualquier lugar</h3>
+        <p className="small muted">
+          Se abren en OneDrive y se reproducen en streaming, sin descargarlos. La primera vez entrá con tu cuenta de Microsoft (la del correo con el que te compartieron la carpeta).
+        </p>
+        <a className="btn" href={folder} target="_blank" rel="noreferrer">
+          Ver capítulos en OneDrive
+        </a>
+        <p className="tiny muted" style={{ marginTop: 12 }}>
+          Consejo: con la app OneDrive instalada en el teléfono se ve mejor y recuerda por dónde ibas.
+        </p>
+      </div>
+    );
+
   if (!configured)
     return (
       <Empty

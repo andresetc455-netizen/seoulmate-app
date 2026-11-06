@@ -26,3 +26,20 @@ test('En la nube: sin configurar avisa; con OneDrive configurado pide entrar con
   await expect(page.getByRole('button', { name: 'Entrar con Microsoft' })).toBeVisible();
   await page.screenshot({ path: 'docs/screenshots/52-en-la-nube.png' });
 });
+
+test('En la nube sin app registrada: botón para abrir la carpeta en OneDrive', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('¿Cómo querés que te llame?').fill('Nicole');
+  await page.getByLabel('Creá una contraseña').fill('clave-secreta');
+  await page.getByLabel('Repetí la contraseña').fill('clave-secreta');
+  await page.getByRole('button', { name: 'Empezar' }).click();
+  await expect(page.getByRole('navigation', { name: 'Secciones' })).toBeVisible();
+  await page.goto('/#/ajustes');
+  await page.getByLabel('Enlace de la carpeta compartida').fill('https://1drv.ms/f/c/abc123/CarpetaDePrueba');
+  await page.getByRole('button', { name: 'Guardar' }).last().click();
+  await expect(page.getByText('Nube configurada')).toBeVisible();
+  await page.goto('/#/dramas?tab=nube');
+  const open = page.getByRole('link', { name: 'Ver capítulos en OneDrive' });
+  await expect(open).toHaveAttribute('href', 'https://1drv.ms/f/c/abc123/CarpetaDePrueba');
+  await page.screenshot({ path: 'docs/screenshots/53-abrir-onedrive.png' });
+});
