@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+// Las respuestas simuladas de Google no pasan por el service worker: se prueba el camino directo.
+test.use({ serviceWorkers: 'block' });
+
 test('En la nube: sin configurar avisa; con OneDrive configurado pide entrar con Microsoft', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('¿Cómo querés que te llame?').fill('Nicole');
