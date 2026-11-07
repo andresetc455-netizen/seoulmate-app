@@ -122,34 +122,15 @@ export function isDriveLink(v: string): boolean {
 }
 
 /**
- * Dirección para el <video>. Si el service worker de la app está activo, el video se pide a "./__drive/ID"
- * y el service worker agrega el permiso en el encabezado (funciona aunque el navegador bloquee cookies).
- * Si no, se usa la dirección directa de la API con el permiso.
+ * Dirección para el <video>: el propio sitio hace de intermediario (/__drive/ID) y le pide el archivo a
+ * Google con el permiso en el encabezado. Funciona en iPhone y en navegadores que bloquean cookies.
  */
 export async function mediaUrl(fileId: string, accessToken: string): Promise<string> {
-  const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker?.controller : null;
-  if (sw) {
-    const ok = await new Promise<boolean>((resolve) => {
-      const ch = new MessageChannel();
-      const timer = setTimeout(() => resolve(false), 1500);
-      ch.port1.onmessage = () => {
-        clearTimeout(timer);
-        resolve(true);
-      };
-      sw.postMessage({ type: 'drive-token', token: accessToken }, [ch.port2]);
-    });
-    if (ok) return `./__drive/${encodeURIComponent(fileId)}`;
-  }
-  return directMediaUrl(fileId, accessToken);
+  return `./__drive/${encodeURIComponent(fileId)}?t=${encodeURIComponent(accessToken)}`;
 }
 
 export function directMediaUrl(fileId: string, accessToken: string): string {
   return `${API}/${encodeURIComponent(fileId)}?alt=media&access_token=${encodeURIComponent(accessToken)}`;
-}
-
-/** Olvida el permiso también en el service worker. */
-export function forgetStreamToken(): void {
-  navigator.serviceWorker?.controller?.postMessage({ type: 'drive-token', token: null });
 }
 
 export async function subtitleText(fileId: string, accessToken: string): Promise<string | null> {
@@ -187,7 +168,7 @@ export async function sniffKind(fileId: string, accessToken: string): Promise<Fi
 }
 
 export const KIND_MESSAGE: Record<FileKind, string> = {
-  mp4: 'El archivo es un MP4, pero este teléfono no puede con su formato interno. Convertilo con HandBrake (perfil Fast 1080p30) y volvé a subirlo.',
+  mp4: 'El archivo es un MP4 pero no se pudo reproducir acá. Probá en Google Drive; si tampoco anda, convertilo con HandBrake (perfil Fast 1080p30) y volvé a subirlo.',
   ts: 'El archivo es una transmisión TS y este navegador no puede convertirla. Probá desde Chrome o convertilo a MP4.',
   mkv: 'El archivo es MKV: se ve en Android y en la computadora, pero no en iPhone. Convertilo a MP4 con HandBrake.',
   html: 'Este archivo no es un video: es una página web guardada con nombre de .mp4. Hay que volver a descargar el capítulo.',
@@ -238,7 +219,6 @@ export function currentToken(): string | null {
 }
 export function forgetToken(): void {
   token = null;
-  forgetStreamToken();
 }
 
 /** Pide permiso de solo lectura. La primera vez muestra la ventana de Google; después suele ser automático. */
