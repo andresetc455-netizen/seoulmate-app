@@ -40,3 +40,48 @@ async function checkNews() {
 self.addEventListener('periodicsync', (event) => {
   if (event.tag === 'seoulmate-news') event.waitUntil(checkNews().catch(() => undefined));
 });
+
+// ---------- Streaming de Google Drive ----------
+// El <video> pide "./__drive/ID" (misma dirección que la app) y acá se le agrega el permiso de lectura
+// de Google en el encabezado, pasando también el rango pedido para poder adelantar y retroceder.
+// Así no hacen falta cookies de Google (que Brave y Safari bloquean) ni poner el permiso en la dirección.
+let driveToken = null;
+
+async function readDriveToken() {
+  if (driveToken) return driveToken;
+  const cache = await caches.open('seoulmate-meta');
+  const r = await cache.match('drive-token');
+  driveToken = r ? await r.text() : null;
+  return driveToken;
+}
+
+self.addEventListener('message', (event) => {
+  const d = event.data;
+  if (!d || d.type !== 'drive-token') return;
+  driveToken = d.token || null;
+  const done = () => event.ports && event.ports[0] && event.ports[0].postMessage('ok');
+  event.waitUntil(
+    caches
+      .open('seoulmate-meta')
+      .then((c) => (driveToken ? c.put('drive-token', new Response(driveToken)) : c.delete('drive-token')))
+      .then(done, done),
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+  const at = url.pathname.indexOf('/__drive/');
+  if (at < 0) return;
+  const id = decodeURIComponent(url.pathname.slice(at + 9));
+  event.respondWith(
+    (async () => {
+      const token = await readDriveToken();
+      if (!token) return new Response('Sin permiso de Google', { status: 401 });
+      const headers = new Headers({ Authorization: 'Bearer ' + token });
+      const range = event.request.headers.get('range');
+      if (range) headers.set('Range', range);
+      return fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(id) + '?alt=media', { headers });
+    })(),
+  );
+});

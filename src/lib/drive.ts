@@ -118,9 +118,35 @@ export function isDriveLink(v: string): boolean {
   }
 }
 
-/** Streaming directo del archivo (MP4) con el permiso de lectura; si el formato no sirve, se usa el reproductor de Drive. */
-export function mediaUrl(fileId: string, accessToken: string): string {
+/**
+ * Dirección para el <video>. Si el service worker de la app está activo, el video se pide a "./__drive/ID"
+ * y el service worker agrega el permiso en el encabezado (funciona aunque el navegador bloquee cookies).
+ * Si no, se usa la dirección directa de la API con el permiso.
+ */
+export async function mediaUrl(fileId: string, accessToken: string): Promise<string> {
+  const sw = typeof navigator !== 'undefined' ? navigator.serviceWorker?.controller : null;
+  if (sw) {
+    const ok = await new Promise<boolean>((resolve) => {
+      const ch = new MessageChannel();
+      const timer = setTimeout(() => resolve(false), 1500);
+      ch.port1.onmessage = () => {
+        clearTimeout(timer);
+        resolve(true);
+      };
+      sw.postMessage({ type: 'drive-token', token: accessToken }, [ch.port2]);
+    });
+    if (ok) return `./__drive/${encodeURIComponent(fileId)}`;
+  }
+  return directMediaUrl(fileId, accessToken);
+}
+
+export function directMediaUrl(fileId: string, accessToken: string): string {
   return `${API}/${encodeURIComponent(fileId)}?alt=media&access_token=${encodeURIComponent(accessToken)}`;
+}
+
+/** Olvida el permiso también en el service worker. */
+export function forgetStreamToken(): void {
+  navigator.serviceWorker?.controller?.postMessage({ type: 'drive-token', token: null });
 }
 
 export async function subtitleText(fileId: string, accessToken: string): Promise<string | null> {
@@ -175,6 +201,7 @@ export function currentToken(): string | null {
 }
 export function forgetToken(): void {
   token = null;
+  forgetStreamToken();
 }
 
 /** Pide permiso de solo lectura. La primera vez muestra la ventana de Google; después suele ser automático. */

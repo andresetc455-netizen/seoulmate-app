@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildLibrary, folderIdFrom, isDriveLink, isValidClientId, mediaUrl } from '../../src/lib/drive';
+import { buildLibrary, directMediaUrl, folderIdFrom, isDriveLink, isValidClientId } from '../../src/lib/drive';
 
 describe('Google Drive', () => {
   it('lee el ID de la carpeta desde el enlace y valida la llave', () => {
@@ -8,7 +8,7 @@ describe('Google Drive', () => {
     expect(isDriveLink('https://evil.example/drive/folders/1AbCdEfGhIjKlMnOp')).toBe(false);
     expect(isValidClientId('123-abc.apps.googleusercontent.com')).toBe(true);
     expect(isValidClientId('0f1e2d3c-4b5a-6978-8a9b-0c1d2e3f4a5b')).toBe(false);
-    expect(mediaUrl('f1', 't k')).toBe('https://www.googleapis.com/drive/v3/files/f1?alt=media&access_token=t%20k');
+    expect(directMediaUrl('f1', 't k')).toBe('https://www.googleapis.com/drive/v3/files/f1?alt=media&access_token=t%20k');
   });
   it('una subcarpeta por drama, capítulos ordenados y subtítulos unidos', () => {
     const lib = buildLibrary(

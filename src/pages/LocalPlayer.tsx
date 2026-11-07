@@ -236,7 +236,7 @@ export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onC
           controls
           playsInline
           preload="metadata"
-          crossOrigin={url.startsWith('blob:') ? undefined : 'anonymous'}
+          crossOrigin={/^https?:/.test(url) ? 'anonymous' : undefined}
           onLoadedMetadata={onLoaded}
           onTimeUpdate={() => store()}
           onPause={() => store(true)}
