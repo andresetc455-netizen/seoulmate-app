@@ -26,3 +26,18 @@ describe('Google Drive', () => {
     expect(lib[0].episodes.map((e) => [e.id, e.subId ?? null])).toEqual([['e1', 's1'], ['e2', null]]);
   });
 });
+
+import { detectKind } from '../../src/lib/drive';
+describe('formato real del archivo', () => {
+  const bytes = (s: string) => new Uint8Array([...s].map((c) => c.charCodeAt(0)));
+  it('reconoce MP4, TS, MKV, páginas web y listas', () => {
+    expect(detectKind(bytes('\0\0\0 ftypisom'))).toBe('mp4');
+    const ts = new Uint8Array(600);
+    ts[0] = ts[188] = ts[376] = 0x47;
+    expect(detectKind(ts)).toBe('ts');
+    expect(detectKind(new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, 1, 2]))).toBe('mkv');
+    expect(detectKind(bytes('  <!DOCTYPE html><html>'))).toBe('html');
+    expect(detectKind(bytes('#EXTM3U\n#EXT-X-VERSION:3'))).toBe('playlist');
+    expect(detectKind(bytes('xxxxxxxxxxxx'))).toBe('unknown');
+  });
+});

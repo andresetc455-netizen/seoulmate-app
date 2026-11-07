@@ -20,7 +20,7 @@ interface Provider {
   signOut(): Promise<void>;
   load(): Promise<CloudShow[]>;
   source(ep: CloudEpisode): PlaySource;
-  fallback?(ep: CloudEpisode): React.ReactNode;
+  fallback?(ep: CloudEpisode, message: string): React.ReactNode;
 }
 
 function googleProvider(clientId: string, folder: string): Provider {
@@ -48,12 +48,31 @@ function googleProvider(clientId: string, folder: string): Provider {
       ep: ep.ep,
       url: async () => gd.mediaUrl(ep.id, await tok()),
       altUrl: async () => gd.directMediaUrl(ep.id, await tok()),
+      rescue: async (video) => {
+        const t = await tok();
+        const kind = await gd.sniffKind(ep.id, t);
+        if (kind === 'ts') {
+          const mpegts = (await import('mpegts.js')).default;
+          const f = mpegts.getFeatureList();
+          if (f.mseLivePlayback || f.msePlayback) {
+            const player = mpegts.createPlayer(
+              { type: 'mpegts', url: gd.apiMediaUrl(ep.id), cors: true, isLive: false },
+              { headers: { Authorization: `Bearer ${t}` }, enableWorker: false, lazyLoad: false },
+            );
+            player.attachMediaElement(video);
+            player.load();
+            void Promise.resolve(player.play()).catch(() => undefined);
+            return { destroy: () => player.destroy() };
+          }
+        }
+        return { message: gd.KIND_MESSAGE[kind] };
+      },
       subtitles: ep.subId ? async () => gd.subtitleText(ep.subId!, await tok()) : undefined,
     }),
     // Si no se puede reproducir acá, se ofrece abrirlo en Google Drive (en el celular abre la app de Drive).
-    fallback: (ep) => (
+    fallback: (ep, message) => (
       <div className="video-error">
-        <p>{ep.unplayable ? 'Google Drive no reconoce este archivo como video: puede estar dañado o todavía se está procesando.' : 'No se pudo reproducir este capítulo acá.'}</p>
+        <p>{message}</p>
         <a className="btn" href={gd.viewUrl(ep.id)} target="_blank" rel="noreferrer">
           Ver en Google Drive
         </a>
@@ -269,7 +288,7 @@ function CloudOverlay({ provider, show, index, dramaId, onIndex }: { provider: P
       hasNext={index < show.episodes.length - 1}
       onNext={() => onIndex(index + 1)}
       onClose={() => onIndex(null)}
-      fallback={provider.fallback?.(ep)}
+      fallback={provider.fallback ? (m) => provider.fallback!(ep, m) : undefined}
     />
   );
 }

@@ -126,6 +126,8 @@ export interface PlaySource {
   ep: number | null;
   url: () => Promise<string>;
   altUrl?: () => Promise<string>; // segunda forma de reproducir si la primera falla
+  /** Último intento: revisa qué es el archivo y, si se puede, lo reproduce de otra manera (p. ej. TS). */
+  rescue?: (video: HTMLVideoElement) => Promise<{ destroy: () => void } | { message: string }>;
   subtitles?: () => Promise<string | null>; // texto .srt o .vtt
 }
 
@@ -139,13 +141,20 @@ export function localSource(file: File, sub?: File): PlaySource {
   };
 }
 
-export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onClose, fallback }: { dramaId: string; dramaTitle: string; source: PlaySource; hasNext: boolean; onNext: () => void; onClose: () => void; fallback?: React.ReactNode }) {
+export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onClose, fallback }: { dramaId: string; dramaTitle: string; source: PlaySource; hasNext: boolean; onNext: () => void; onClose: () => void; fallback?: (message: string) => React.ReactNode }) {
   const video = useRef<HTMLVideoElement>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [vtt, setVtt] = useState<string | null>(null);
   const [error, setError] = useState('');
   const lastSaved = useRef(0);
   const triedAlt = useRef(false);
+  const rescued = useRef<null | 'trying' | (() => void)>(null);
+  useEffect(
+    () => () => {
+      if (typeof rescued.current === 'function') rescued.current();
+    },
+    [],
+  );
 
   useEffect(() => {
     let alive = true;
@@ -221,7 +230,7 @@ export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onC
         )}
       </header>
       {error && fallback ? (
-        fallback
+        fallback(error)
       ) : error ? (
         <div className="video-error">
           <p>{error}</p>
@@ -247,15 +256,30 @@ export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onC
             if (hasNext) onNext();
           }}
           onError={() => {
+            const rescue = () => {
+              if (source.rescue && video.current && rescued.current === null) {
+                rescued.current = 'trying';
+                void source
+                  .rescue(video.current)
+                  .then((r) => {
+                    if ('destroy' in r) rescued.current = r.destroy;
+                    else setError(r.message);
+                  })
+                  .catch(() => setError('Este teléfono no puede reproducir este video.'));
+                return;
+              }
+              if (rescued.current === 'trying' || typeof rescued.current === 'function') return;
+              setError('Este teléfono no puede reproducir este video.');
+            };
             if (source.altUrl && !triedAlt.current) {
               triedAlt.current = true;
               void source
                 .altUrl()
-                .then(setUrl)
-                .catch(() => setError('Este teléfono no puede reproducir este video.'));
+                .then((alt) => (alt === url ? rescue() : setUrl(alt)))
+                .catch(rescue);
               return;
             }
-            setError('Este teléfono no puede reproducir este video.');
+            rescue();
           }}
           data-testid="local-video"
         >

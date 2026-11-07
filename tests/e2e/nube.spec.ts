@@ -66,12 +66,14 @@ test('En la nube con Google Drive: entrar, ver dramas de la carpeta y reproducir
             { id: 'e2', name: 'Goblin S01E02.webm', mimeType: 'video/webm', size: '2490', videoMediaMetadata: { durationMillis: '3000' } },
             { id: 'e1', name: 'Goblin S01E01.webm', mimeType: 'video/webm', size: '2496', videoMediaMetadata: { durationMillis: '3000' } },
             { id: 's1', name: 'Goblin S01E01.srt', mimeType: 'application/x-subrip' },
+            { id: 'e3', name: 'Goblin S01E03.mp4', mimeType: 'video/mp4', size: '5000' },
           ]
         : [];
     return r.fulfill({ json: { files } });
   });
   await page.route('https://www.googleapis.com/drive/v3/files/*?alt=media**', (r) => {
     const id = new URL(r.request().url()).pathname.split('/').pop();
+    if (id === 'e3') return r.fulfill({ body: '<!DOCTYPE html><html><body>Página de descarga</body></html>', contentType: 'video/mp4', headers: { 'access-control-allow-origin': '*' } });
     const file = id === 's1' ? 'tests/fixtures/Goblin.S01E01.srt' : id === 'e1' ? 'tests/fixtures/Goblin.S01E01.webm' : 'tests/fixtures/Goblin.S01E02.webm';
     return r.fulfill({ path: file, headers: { 'access-control-allow-origin': '*' }, contentType: id === 's1' ? 'text/plain' : 'video/webm' });
   });
@@ -94,13 +96,19 @@ test('En la nube con Google Drive: entrar, ver dramas de la carpeta y reproducir
   await expect(show).toHaveCount(1);
   await expect(show).toContainText('Goblin');
   await show.getByRole('button', { name: /Goblin/ }).click();
-  await expect(page.getByTestId('cloud-episode')).toHaveCount(2);
+  await expect(page.getByTestId('cloud-episode')).toHaveCount(3);
+  await expect(page.getByTestId('cloud-episode').nth(2)).toContainText('Archivo dañado');
   await expect(page.getByTestId('cloud-episode').first()).toContainText('Capítulo 1');
   await page.screenshot({ path: 'docs/screenshots/54-nube-google.png' });
   await page.getByTestId('cloud-episode').first().click();
   await expect(page.locator('.video-name')).toHaveText('Capítulo 1');
   await expect(page.getByTestId('local-video').locator('track')).toHaveCount(1);
   await expect(page.locator('.video-name')).toHaveText('Capítulo 2', { timeout: 15_000 });
+  await page.locator('.video-name').getByText('Capítulo 2').waitFor();
+  await page.getByRole('button', { name: 'Siguiente' }).click();
+  await expect(page.locator('.video-name')).toHaveText('Capítulo 3');
+  await expect(page.getByText('Este archivo no es un video: es una página web')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole('link', { name: 'Ver en Google Drive' })).toBeVisible();
   await page.getByRole('button', { name: '✕ Cerrar' }).click();
   // El drama aparece en "Mis dramas" con el progreso.
   await page.getByRole('tab', { name: 'Mis dramas' }).click();

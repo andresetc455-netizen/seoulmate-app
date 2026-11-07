@@ -161,6 +161,40 @@ export async function subtitleText(fileId: string, accessToken: string): Promise
   }
 }
 
+// ---------- qué hay realmente adentro del archivo ----------
+export type FileKind = 'mp4' | 'ts' | 'mkv' | 'html' | 'playlist' | 'unknown';
+
+/** Reconoce el formato real por los primeros bytes (la extensión ".mp4" a veces miente). */
+export function detectKind(b: Uint8Array): FileKind {
+  const ascii = (from: number, len: number) => String.fromCharCode(...b.slice(from, from + len));
+  if (b.length > 8 && ['ftyp', 'moov', 'mdat', 'free', 'wide'].includes(ascii(4, 4))) return 'mp4';
+  if (b.length > 376 && b[0] === 0x47 && b[188] === 0x47 && b[376] === 0x47) return 'ts';
+  if (b.length > 4 && b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3) return 'mkv';
+  const head = ascii(0, Math.min(b.length, 512)).replace(/^\uFEFF/, '').trimStart().toLowerCase();
+  if (head.startsWith('#extm3u')) return 'playlist';
+  if (head.startsWith('<!doctype') || head.startsWith('<html') || head.startsWith('<')) return 'html';
+  return 'unknown';
+}
+
+export function apiMediaUrl(fileId: string): string {
+  return `${API}/${encodeURIComponent(fileId)}?alt=media`;
+}
+
+export async function sniffKind(fileId: string, accessToken: string): Promise<FileKind> {
+  const res = await fetch(apiMediaUrl(fileId), { headers: { Authorization: `Bearer ${accessToken}`, Range: 'bytes=0-4095' } });
+  if (!res.ok) return 'unknown';
+  return detectKind(new Uint8Array(await res.arrayBuffer()));
+}
+
+export const KIND_MESSAGE: Record<FileKind, string> = {
+  mp4: 'El archivo es un MP4, pero este teléfono no puede con su formato interno. Convertilo con HandBrake (perfil Fast 1080p30) y volvé a subirlo.',
+  ts: 'El archivo es una transmisión TS y este navegador no puede convertirla. Probá desde Chrome o convertilo a MP4.',
+  mkv: 'El archivo es MKV: se ve en Android y en la computadora, pero no en iPhone. Convertilo a MP4 con HandBrake.',
+  html: 'Este archivo no es un video: es una página web guardada con nombre de .mp4. Hay que volver a descargar el capítulo.',
+  playlist: 'Este archivo es una lista de reproducción (no tiene el video adentro). Hay que descargar el capítulo completo.',
+  unknown: 'No se reconoce el formato de este archivo. Probá abrirlo con VLC en la computadora y convertirlo a MP4.',
+};
+
 export function viewUrl(fileId: string): string {
   return `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/view`;
 }

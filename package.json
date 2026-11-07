@@ -18,6 +18,7 @@
     "@fontsource/manrope": "^5.3.0",
     "@fontsource/nunito": "^5.3.0",
     "@supabase/supabase-js": "^2.118.0",
+    "mpegts.js": "^1.8.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.4"
