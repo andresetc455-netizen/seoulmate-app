@@ -47,15 +47,17 @@ function googleProvider(clientId: string, folder: string): Provider {
       name: ep.name,
       ep: ep.ep,
       url: async () => gd.mediaUrl(ep.id, await tok()),
+      altUrl: async () => gd.directMediaUrl(ep.id, await tok()),
       subtitles: ep.subId ? async () => gd.subtitleText(ep.subId!, await tok()) : undefined,
     }),
-    // Si el teléfono no puede con el formato, se usa el reproductor de Drive (convierte el video).
+    // Si no se puede reproducir acá, se ofrece abrirlo en Google Drive (en el celular abre la app de Drive).
     fallback: (ep) => (
-      <div className="drive-frame">
-        <iframe src={gd.previewUrl(ep.id)} title={ep.name} allow="autoplay; fullscreen" allowFullScreen />
-        <a className="btn sm secondary" href={gd.viewUrl(ep.id)} target="_blank" rel="noreferrer">
-          Abrir en Google Drive
+      <div className="video-error">
+        <p>{ep.unplayable ? 'Google Drive no reconoce este archivo como video: puede estar dañado o todavía se está procesando.' : 'No se pudo reproducir este capítulo acá.'}</p>
+        <a className="btn" href={gd.viewUrl(ep.id)} target="_blank" rel="noreferrer">
+          Ver en Google Drive
         </a>
+        <p className="tiny" style={{ marginTop: 12, opacity: 0.7 }}>Si tampoco anda en Drive, hay que volver a subir el archivo (mejor en MP4).</p>
       </div>
     ),
   };
@@ -239,7 +241,7 @@ export function CloudShows() {
                       <span className="ep-num">{ep.ep ?? '·'}</span>
                       <span className="grow">
                         <span className="title" style={{ display: 'block' }}>{ep.ep ? `Capítulo ${ep.ep}` : ep.name}</span>
-                        <span className="tiny muted">{p && isDone(p) ? 'Visto' : p ? `Quedaste en ${clock(p.time)}` : ep.subId ? 'Con subtítulos' : `${Math.round(ep.size / 1048576)} MB`}</span>
+                        <span className="tiny muted">{ep.unplayable ? 'Archivo dañado o procesándose en Drive' : p && isDone(p) ? 'Visto' : p ? `Quedaste en ${clock(p.time)}` : ep.subId ? 'Con subtítulos' : `${Math.round(ep.size / 1048576)} MB`}</span>
                       </span>
                       <span aria-hidden="true">▶</span>
                     </button>

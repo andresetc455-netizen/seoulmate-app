@@ -125,6 +125,7 @@ export interface PlaySource {
   name: string;
   ep: number | null;
   url: () => Promise<string>;
+  altUrl?: () => Promise<string>; // segunda forma de reproducir si la primera falla
   subtitles?: () => Promise<string | null>; // texto .srt o .vtt
 }
 
@@ -144,6 +145,7 @@ export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onC
   const [vtt, setVtt] = useState<string | null>(null);
   const [error, setError] = useState('');
   const lastSaved = useRef(0);
+  const triedAlt = useRef(false);
 
   useEffect(() => {
     let alive = true;
@@ -244,7 +246,17 @@ export function VideoOverlay({ dramaId, dramaTitle, source, hasNext, onNext, onC
             store(true);
             if (hasNext) onNext();
           }}
-          onError={() => setError('Este teléfono no puede reproducir este formato de video.')}
+          onError={() => {
+            if (source.altUrl && !triedAlt.current) {
+              triedAlt.current = true;
+              void source
+                .altUrl()
+                .then(setUrl)
+                .catch(() => setError('Este teléfono no puede reproducir este video.'));
+              return;
+            }
+            setError('Este teléfono no puede reproducir este video.');
+          }}
           data-testid="local-video"
         >
           {vtt && <track kind="subtitles" src={vtt} srcLang="es" label="Español" default />}

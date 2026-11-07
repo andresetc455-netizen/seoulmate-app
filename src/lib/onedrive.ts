@@ -16,6 +16,7 @@ export interface CloudEpisode {
   ep: number | null;
   size: number;
   subId?: string; // subtítulo .srt/.vtt con el mismo nombre
+  unplayable?: boolean;
 }
 export interface CloudShow {
   id: string;

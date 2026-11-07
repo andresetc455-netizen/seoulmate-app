@@ -13,6 +13,7 @@ export interface DriveItem {
   mimeType: string;
   size?: string;
   thumbnailLink?: string;
+  videoMediaMetadata?: { durationMillis?: string; width?: number; height?: number };
 }
 export interface CloudShow {
   id: string;
@@ -26,6 +27,7 @@ export interface CloudEpisode {
   ep: number | null;
   size: number;
   subId?: string;
+  unplayable?: boolean; // Drive no reconoce el video: está dañado o todavía lo está procesando
 }
 
 /** Acepta el enlace de la carpeta ("…/folders/ID?usp=sharing") o el ID solo. */
@@ -54,6 +56,7 @@ export function buildLibrary(root: DriveItem[], children: Record<string, DriveIt
       ep: parseEpisode(f.name),
       size: Number(f.size ?? 0),
       subId: items.find((x) => /\.(srt|vtt)$/i.test(x.name) && subBase(x.name) === subBase(f.name))?.id,
+      unplayable: !f.videoMediaMetadata?.durationMillis,
     }));
   const shows: CloudShow[] = root
     .filter(isFolder)
@@ -71,7 +74,7 @@ async function list(token: string, parent: string): Promise<DriveItem[]> {
   do {
     const p = new URLSearchParams({
       q: `'${parent}' in parents and trashed = false`,
-      fields: 'nextPageToken, files(id, name, mimeType, size, thumbnailLink)',
+      fields: 'nextPageToken, files(id, name, mimeType, size, thumbnailLink, videoMediaMetadata)',
       pageSize: '1000',
       supportsAllDrives: 'true',
       includeItemsFromAllDrives: 'true',

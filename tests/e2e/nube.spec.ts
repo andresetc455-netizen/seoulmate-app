@@ -63,8 +63,8 @@ test('En la nube con Google Drive: entrar, ver dramas de la carpeta y reproducir
       ? [{ id: 'goblin', name: 'Goblin (2016)', mimeType: 'application/vnd.google-apps.folder' }]
       : q.includes("'goblin'")
         ? [
-            { id: 'e2', name: 'Goblin S01E02.webm', mimeType: 'video/webm', size: '2490' },
-            { id: 'e1', name: 'Goblin S01E01.webm', mimeType: 'video/webm', size: '2496' },
+            { id: 'e2', name: 'Goblin S01E02.webm', mimeType: 'video/webm', size: '2490', videoMediaMetadata: { durationMillis: '3000' } },
+            { id: 'e1', name: 'Goblin S01E01.webm', mimeType: 'video/webm', size: '2496', videoMediaMetadata: { durationMillis: '3000' } },
             { id: 's1', name: 'Goblin S01E01.srt', mimeType: 'application/x-subrip' },
           ]
         : [];
